@@ -6,6 +6,7 @@
     <title>Game</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:,">
 </head>
 <body>
     <!-- Menu Container -->
@@ -16,38 +17,49 @@
         </div>
     </div>
 
+    <div id="yappingDogImg" class="floating-gif d-none">
+      <img src="./resources/images/yapping.gif" alt="Floating Animation">
+    </div>
 
-    <!--Save Load Game Input Field-->
-<div id="loadSaveGameStringPopup" class="save-load-popup-container bg-dark p-4 rounded shadow-lg d-none">
-    <div class="save-load-header-container d-flex justify-content-between align-items-center mb-3">
-      <div class="save-load-header">Copy String To A Text File:</div>
-      <div class="save-load-buttons-container">
-        <button id="loadStringButton" class="save-load-buttons btn btn-success btn-sm flex-grow-1 mr-4">Load</button>
-        <button id="copyButtonSavePopup" class="save-load-buttons btn btn-success btn-sm flex-grow-1 mr-4">Copy</button>
-        <button id="closeButtonSavePopup" class="save-load-buttons btn btn-danger btn-sm flex-grow-0">Close</button>
-      </div>
+    <div id="waitingDogImg" class="floating-gif d-none">
+      <img src="./resources/images/waiting.gif" alt="Floating Animation">
     </div>
-    <div class="save-load-input-container">
-      <textarea id="loadSaveGameStringTextArea" class="save-load-input-field" aria-label=""></textarea>
+
+    <div id="floatingContainer">
+        <div id="innerContainer">
+            <div class="input-container">
+                <label for="minSessionTimeField" class="d-none form-label left-column-elements">Min Yapping Time</label>
+                <input id="minSessionTimeField" type="number" class="d-none form-control left-column-elements" placeholder="Enter Min Session Time">
+            </div>
+            <div class="input-container">
+                <label for="maxSessionTimeField" class="d-none form-label left-column-elements">Max Yapping Time</label>
+                <input id="maxSessionTimeField" type="number" class="d-none form-control left-column-elements" placeholder="Enter Max Session Time">
+            </div>
+            <div class="input-container">
+                <label for="minWaitTimeField" class="d-none form-label left-column-elements">Min Cooldown Time</label>
+                <input id="minWaitTimeField" type="number" class="d-none form-control left-column-elements" placeholder="Enter Min Wait Time">
+            </div>
+            <div class="input-container">
+                <label for="maxWaitTimeField" class="d-none form-label left-column-elements">Max Cooldown Time</label>
+                <input id="maxWaitTimeField" type="number" class="d-none form-control left-column-elements" placeholder="Enter Max Wait Time">
+            </div>
+        </div>
     </div>
-  </div>
+    
+       
 
     <!-- Canvas Container -->
     <div id="canvasContainer" class="d-none">
         <!-- Button Row -->
         <div id="buttonRow" class="d-flex justify-content-center mb-3">
-            <button id="button1" class="btn btn-warning mr-2">Button1</button>
-            <button id="button2" class="btn btn-success">Button2</button>
+            <button id="button1" class="btn btn-success mr-2">Woof!</button>
+            <button id="button2" class="btn btn-danger">Stop</button>
             <button id="returnToMenu" class="btn btn-secondary mr-2">Return to Menu</button>
         </div>
         <!-- Canvas Row -->
         <div class="d-flex justify-content-center">
             <canvas id="canvas"></canvas>
         </div>
-    </div>
-
-    <!-- Overlay -->
-    <div id="overlay" class="d-none overlay">
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

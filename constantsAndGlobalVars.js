@@ -40,6 +40,12 @@ let sessionDuration = 0;
 let currentSound = null;
 let currentSoundName = '';
 let remainingTimeSession = null;
+let waitTimerActive = false;
+
+let maxWaitTime = 120;
+let minWaitTime = 60;
+let maxSessionTime = 60;
+let minSessionTime = 20;
 
 //FLAGS
 let audioMuted;
@@ -62,7 +68,17 @@ export function setElements() {
         buttonRow: document.getElementById('buttonRow'),
         overlay: document.getElementById('overlay'),
         button1: document.getElementById('button1'),
-        button2: document.getElementById('button2')
+        button2: document.getElementById('button2'),
+        yappingDogImg: document.getElementById('yappingDogImg'),
+        waitingDogImg: document.getElementById('waitingDogImg'),
+        minWaitTimeLabel: document.querySelector('label[for="minWaitTimeField"]'),
+        maxWaitTimeLabel: document.querySelector('label[for="maxWaitTimeField"]'),
+        minSessionTimeLabel: document.querySelector('label[for="minSessionTimeField"]'),
+        maxSessionTimeLabel: document.querySelector('label[for="maxSessionTimeField"]'),
+        minWaitTimeField: document.getElementById('minWaitTimeField'),
+        maxWaitTimeField: document.getElementById('maxWaitTimeField'),
+        minSessionTimeField: document.getElementById('minSessionTimeField'),
+        maxSessionTimeField: document.getElementById('maxSessionTimeField'),
     };
 }
 
@@ -237,4 +253,44 @@ export function getRemainingTimeSession() {
 
 export function setRemainingTimeSession(value) {
     remainingTimeSession = value;
+}
+
+export function getWaitTimerActive() {
+    return waitTimerActive;
+}
+
+export function setWaitTimerActive(value) {
+    waitTimerActive = value;
+}
+
+export function getMaxWaitTime() {
+    return maxWaitTime;
+}
+
+export function setMaxWaitTime(value) {
+    maxWaitTime = value;
+}
+
+export function getMinWaitTime() {
+    return minWaitTime;
+}
+
+export function setMinWaitTime(value) {
+    minWaitTime = value;
+}
+
+export function getMaxSessionTime() {
+    return maxSessionTime;
+}
+
+export function setMaxSessionTime(value) {
+    maxSessionTime = value;
+}
+
+export function getMinSessionTime() {
+    return minSessionTime;
+}
+
+export function setMinSessionTime(value) {
+    minSessionTime = value;
 }

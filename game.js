@@ -1,15 +1,18 @@
 import { localize } from './localization.js';
-import { setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, setCurrentSoundName, getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState } from './constantsAndGlobalVars.js';
+import { getMaxWaitTime, setMaxWaitTime, getMinWaitTime, setMinWaitTime, getMaxSessionTime, setMaxSessionTime, getMinSessionTime, setMinSessionTime, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, setCurrentSoundName, getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState, setWaitTimerActive } from './constantsAndGlobalVars.js';
 import { updateCanvas } from './ui.js';
 
 let sessionTimer;
+let waitTimer;
+let sessionStartTime;
+let sessionDuration;
 
 export function startGame() {
     const ctx = getElements().canvas.getContext('2d');
     const container = getElements().canvasContainer;
 
     function updateCanvasSize() {
-        const canvasWidth = container.clientWidth * 0.8;
+        const canvasWidth = container.clientWidth * 0.7;
         const canvasHeight = container.clientHeight * 0.8;
 
         getElements().canvas.style.width = `${canvasWidth}px`;
@@ -26,11 +29,98 @@ export function startGame() {
 
     if (getBeginGameStatus()) {
         setBeginGameStatus(false);
+        initialiseSideBarElements();
     }
     setGameState(getGameVisibleActive());
 
     gameLoop();
 }
+
+function initialiseSideBarElements() {
+
+  getElements().minWaitTimeField.value = getMinWaitTime();
+  getElements().maxWaitTimeField.value = getMaxWaitTime();
+  getElements().minSessionTimeField.value = getMinSessionTime();
+  getElements().maxSessionTimeField.value = getMaxSessionTime();
+
+  getElements().minWaitTimeLabel.classList.remove('d-none');
+  getElements().maxWaitTimeLabel.classList.remove('d-none');
+  getElements().minSessionTimeLabel.classList.remove('d-none');
+  getElements().maxSessionTimeLabel.classList.remove('d-none');
+  
+  getElements().minWaitTimeField.classList.remove('d-none');
+  getElements().maxWaitTimeField.classList.remove('d-none');
+  getElements().minSessionTimeField.classList.remove('d-none');
+  getElements().maxSessionTimeField.classList.remove('d-none');
+
+}
+
+export function updateWaitTimerValues() {
+  const minWaitTimeField = getElements().minWaitTimeField;
+  const maxWaitTimeField = getElements().maxWaitTimeField;
+  const minSessionTimeField = getElements().minSessionTimeField;
+  const maxSessionTimeField = getElements().maxSessionTimeField;
+
+  const minWaitTimeValue = parseInt(minWaitTimeField.value);
+  const maxWaitTimeValue = parseInt(maxWaitTimeField.value);
+  const minSessionTimeValue = parseInt(minSessionTimeField.value);
+  const maxSessionTimeValue = parseInt(maxSessionTimeField.value);
+
+  // Check for valid min/max values and update accordingly
+  let validMinWait = true;
+  let validMaxWait = true;
+  let validMinSession = true;
+  let validMaxSession = true;
+
+  // Validate Wait Time values
+  if (!isNaN(minWaitTimeValue) && minWaitTimeValue > maxWaitTimeValue) {
+      minWaitTimeField.style.color = 'red';
+      validMinWait = false;
+  } else {
+      minWaitTimeField.style.color = 'black';
+  }
+
+  if (!isNaN(maxWaitTimeValue) && maxWaitTimeValue < minWaitTimeValue) {
+      maxWaitTimeField.style.color = 'red';
+      validMaxWait = false;
+  } else {
+      maxWaitTimeField.style.color = 'black';
+  }
+
+  // Validate Session Time values
+  if (!isNaN(minSessionTimeValue) && minSessionTimeValue > maxSessionTimeValue) {
+      minSessionTimeField.style.color = 'red';
+      validMinSession = false;
+  } else {
+      minSessionTimeField.style.color = 'black';
+  }
+
+  if (!isNaN(maxSessionTimeValue) && maxSessionTimeValue < minSessionTimeValue) {
+      maxSessionTimeField.style.color = 'red';
+      validMaxSession = false;
+  } else {
+      maxSessionTimeField.style.color = 'black';
+  }
+
+  // Update values only if valid
+  if (validMinWait) {
+      setMinWaitTime(minWaitTimeValue);
+  }
+
+  if (validMaxWait) {
+      setMaxWaitTime(maxWaitTimeValue);
+  }
+
+  if (validMinSession) {
+      setMinSessionTime(minSessionTimeValue);
+  }
+
+  if (validMaxSession) {
+      setMaxSessionTime(maxSessionTimeValue);
+  }
+}
+
+
 
 export async function gameLoop() {
     const ctx = getElements().canvas.getContext('2d');
@@ -39,17 +129,18 @@ export async function gameLoop() {
 
         if (gameState === getGameVisibleActive()) {
             updateCanvas();
+            updateWaitTimerValues();
         }
 
         requestAnimationFrame(gameLoop);
     }
 }
 
-let sessionStartTime;
-let sessionDuration;
-
 export async function startSession() {
-  sessionDuration = Math.floor(Math.random() * (60 - 30 + 1)) + 30;
+  getElements().waitingDogImg.classList.add('d-none');
+  getElements().yappingDogImg.classList.remove('d-none');
+  sessionDuration = Math.floor(Math.random() * (getMaxSessionTime() - getMinSessionTime() + 1)) + getMinSessionTime();
+  
   
   setSessionActive(true);
   sessionStartTime = Date.now();
@@ -62,7 +153,7 @@ export async function startSession() {
     if (getRemainingTimeSession() <= 0) {
       stopSession();
     } else {
-      playRandomSound();  // Sound playing logic commented out
+      playRandomSound();
     }
   }, 1000);
 }
@@ -70,29 +161,63 @@ export async function startSession() {
 export async function stopSession() {
   clearInterval(sessionTimer);
   setSessionActive(false);
-  stopAllSounds();  // Sound stopping logic commented out
+  stopAllSounds();
+
+  getElements().yappingDogImg.classList.add('d-none');
+  getElements().waitingDogImg.classList.remove('d-none');
+
+  startWaitTimer();
 }
 
-// Function to play a random sound
-function playRandomSound() {
-  const sampleURLs = getSampleURLS();  // Get the sample URLs from the getter
-  const soundIds = Object.keys(sampleURLs.samples);  // Get the available sound IDs
-  const randomId = soundIds[Math.floor(Math.random() * soundIds.length)];  // Choose a random sound ID
-  const sound = sampleURLs.samples[randomId];  // Get the sound data for the random ID
+export function startWaitTimer() {
+  let remainingWaitTime = Math.floor(Math.random() * (getMaxWaitTime() - getMinWaitTime() + 1)) + getMinWaitTime();
+  setWaitTimerActive(true);
 
-  const audio = new Audio(sound.url);  // Create a new Audio object with the sound's URL
-  setCurrentSound({ sound: sound.name, audio: audio }); // Set the current sound to be played
+  waitTimer = setInterval(() => {
+      remainingWaitTime--;
+      setRemainingTimeSession(remainingWaitTime);
+      
+      if (remainingWaitTime <= 0) {
+          clearInterval(waitTimer);
+          setWaitTimerActive(false);
+          startSession();
+      }
+  }, 1000);
+}
+
+function playRandomSound() {
+  const sampleURLs = getSampleURLS();
+  const soundIds = Object.keys(sampleURLs.samples);
+  const randomId = soundIds[Math.floor(Math.random() * soundIds.length)];
+  const sound = sampleURLs.samples[randomId];
+
+  const audio = new Audio(sound.url);
+  setCurrentSound({ sound: sound.name, audio: audio });
   audio.play();
 }
 
-// Function to stop all sounds
 function stopAllSounds() {
-  const currentSound = getCurrentSound();  // Get the current sound (which includes the audio object)
+  const currentSound = getCurrentSound();
   if (currentSound && currentSound.audio) {
-    currentSound.audio.pause();  // Pause the audio
-    currentSound.audio.currentTime = 0;  // Reset the audio to the start
+    currentSound.audio.pause();
+    currentSound.audio.currentTime = 0;
   }
 }
+
+export function stopSessionTimer() {
+  clearInterval(sessionTimer);
+  setSessionActive(false);
+}
+
+export function stopWaitTimer() {
+  clearInterval(waitTimer);
+}
+
+export function stopAllTimers() {
+  stopSessionTimer();
+  stopWaitTimer();
+}
+
 
 export function setGameState(newState) {
     console.log("Setting game state to " + newState);
