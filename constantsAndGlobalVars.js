@@ -20,9 +20,26 @@ export const INITIAL_SPEED_PLAYER = 4;
 export const INITIAL_SPEED_MOVING_ENEMY = 4;
 export const MAX_ATTEMPTS_TO_DRAW_ENEMIES = 1000;
 
-export const DICTIONARY_URL = './resources/WebstersEnglishDictionary-master/dictionary.json';
+const samplesURLS = {
+    samples: {
+      1: { name: "dog1", url: "./resources/sounds/dog1.mp3" },
+      2: { name: "dog2", url: "./resources/sounds/dog2.mp3" },
+      3: { name: "dog3", url: "./resources/sounds/dog3.mp3" },
+      4: { name: "dog4", url: "./resources/sounds/dog4.mp3" },
+      5: { name: "dog5", url: "./resources/sounds/dog5.mp3" },
+      6: { name: "dog6", url: "./resources/sounds/dog6.mp3" },
+      7: { name: "dog7", url: "./resources/sounds/dog7.mp3" },
+      8: { name: "dog8", url: "./resources/sounds/dog8.mp3" },
+      9: { name: "dog9", url: "./resources/sounds/dog9.mp3" },
+      10: { name: "dog10", url: "./resources/sounds/dog10.mp3" }
+    }
+  };
 
 //GLOBAL VARIABLES
+let sessionActive = false;
+let sessionTimer = null;
+let sessionDuration = 0;
+let currentSound = null;
 
 //FLAGS
 let audioMuted;
@@ -47,11 +64,6 @@ export function setElements() {
         button1: document.getElementById('button1'),
         button2: document.getElementById('button2')
     };
-}
-
-
-export function getPlayerObject() {
-    return playerObject;
 }
 
 export function setGameStateVariable(value) {
@@ -155,22 +167,6 @@ export function getGameVisibleActive() {
     return GAME_VISIBLE_ACTIVE;
 }
 
-export function getNumberOfEnemySquares() {
-    return NUMBER_OF_ENEMY_SQUARES;
-}
-
-export function getInitialSpeedPlayer() {
-    return INITIAL_SPEED_PLAYER;
-}
-
-export function getInitialSpeedMovingEnemy() {
-    return INITIAL_SPEED_MOVING_ENEMY;
-}
-
-export function getMaxAttemptsToDrawEnemies() {
-    return MAX_ATTEMPTS_TO_DRAW_ENEMIES;
-}
-
 export function getLanguageSelected() {
     return languageSelected;
 }
@@ -193,4 +189,36 @@ export function getGameInProgress() {
 
 export function setGameInProgress(value) {
     gameInProgress = value;
+}
+
+export function getSessionActive() {
+    return sessionActive;
+}
+  
+export function setSessionActive(status) {
+    sessionActive = status;
+}
+  
+export function setSessionTimer(timer) {
+    sessionTimer = timer;
+}
+  
+export function setSessionDuration(duration) {
+    sessionDuration = duration;
+}
+
+export function getSessionDuration() {
+    return sessionDuration;
+}
+  
+export function getCurrentSound() {
+    return currentSound;
+}
+  
+export function setCurrentSound(sound) {
+    currentSound = sound;
+}
+
+export function getSampleURLS() {
+    return samplesURLS;
 }

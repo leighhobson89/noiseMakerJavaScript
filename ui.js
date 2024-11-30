@@ -1,7 +1,7 @@
-import { getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getBeginGameStatus, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage } from './constantsAndGlobalVars.js';
+import { getSessionActive, setSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getBeginGameStatus, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage } from './constantsAndGlobalVars.js';
 import { setGameState, startGame, gameLoop } from './game.js';
 import { initLocalization, localize } from './localization.js';
-
+import { startSession } from './game.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
@@ -21,11 +21,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     getElements().button1.addEventListener('click', () => {
-        //BUTTON 1 CODE
+        if (!getSessionActive()) {
+            startSession();
+        }
     });
 
     getElements().button2.addEventListener('click', () => {
-        //BUTTON 2 CODE
+        if (getSessionActive()) {
+            stopSession();
+        }
     });
 
     setGameState(getMenuState());
@@ -60,4 +64,14 @@ export function disableActivateButton(button, action, activeClass) {
             break;
     }
 }
+
+export function updateCanvas() {
+    if (getSessionActive()) {
+      const ctx = getElements().canvas.getContext('2d');
+      ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.font = '20px Arial';
+      ctx.fillText(`Session active...`, 10, 30);
+    }
+  }
 

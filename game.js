@@ -1,5 +1,8 @@
 import { localize } from './localization.js';
-import { setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState } from './constantsAndGlobalVars.js';
+import { getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState } from './constantsAndGlobalVars.js';
+import { updateCanvas } from './ui.js';
+
+let sessionTimer;
 
 //--------------------------------------------------------------------------------------------------------
 
@@ -37,15 +40,12 @@ export async function gameLoop() {
         ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
 
         if (gameState === getGameVisibleActive()) {
-            draw(ctx);
+            updateCanvas();
         }
-
-        await gameLoopFunction();
 
         requestAnimationFrame(gameLoop);
     }
 }
-
 
 function draw(ctx) {
     const canvasWidth = getElements().canvas.width;
@@ -59,6 +59,62 @@ function draw(ctx) {
 export async function gameLoopFunction() {
 
 }
+
+export async function startSession() {
+    const randomTime = Math.floor(Math.random() * (60 - 30 + 1)) + 30; // Random time between 30s and 60s
+    setSessionDuration(randomTime);  // Store the duration in the global variable
+    setSessionActive(true);  // Set session status to active
+  
+    const timer = setInterval(() => {
+      const remainingTime = getSessionDuration() - Math.floor(Date.now() / 1000);  // Get the session duration with the getter
+      if (remainingTime <= 0) {
+        stopSession();  // Stop session when time is up
+      } else {
+        updateCanvasWithTime(remainingTime);  // Update canvas with the remaining time
+      }
+    }, 1000);
+  
+    setSessionTimer(timer);  // Set the session timer
+    playRandomSound();  // Start playing a random sound
+  }
+  
+  export async function stopSession() {
+    clearInterval(sessionTimer);
+    setSessionActive(false);
+    updateCanvasWithTime(0);
+  }
+  
+  export function updateCanvasWithTime(time) {
+    const ctx = getElements().canvas.getContext('2d');
+    const width = getElements().canvas.width;
+    const height = getElements().canvas.height;
+    
+    ctx.clearRect(0, 0, width, height);
+    
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.fillText(`Time left: ${time} seconds`, 10, 30);
+  
+    const currentSound = getCurrentSound();
+  
+    if (currentSound) {
+      ctx.fillText(`Playing: ${currentSound.name}`, 10, 60);
+    }
+  }
+  
+  function playRandomSound() {
+    const sampleURLs = getSampleURLS();  // Get the sample URLs from the getter
+    const soundIds = Object.keys(sampleURLs.samples);  // Get the available sound IDs
+    const randomId = soundIds[Math.floor(Math.random() * soundIds.length)];  // Choose a random sound ID
+    const sound = sampleURLs.samples[randomId];  // Get the sound data for the random ID
+  
+    setCurrentSound(sound);  // Set the current sound to be played
+  
+    const audio = new Audio(sound.url);  // Create a new Audio object with the sound's URL
+    audio.loop = true;  // Play the sound on loop
+    audio.play();
+  }
+  
 
 //===============================================================================================================
 
