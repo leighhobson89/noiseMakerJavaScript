@@ -1,7 +1,7 @@
-import { getSessionActive, setSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getBeginGameStatus, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage } from './constantsAndGlobalVars.js';
+import { getCurrentSound, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, getSessionActive, setSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getBeginGameStatus, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage } from './constantsAndGlobalVars.js';
 import { setGameState, startGame, gameLoop } from './game.js';
 import { initLocalization, localize } from './localization.js';
-import { startSession } from './game.js';
+import { startSession, stopSession } from './game.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
@@ -67,11 +67,30 @@ export function disableActivateButton(button, action, activeClass) {
 
 export function updateCanvas() {
     if (getSessionActive()) {
-      const ctx = getElements().canvas.getContext('2d');
-      ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
-      ctx.fillStyle = 'white';
-      ctx.font = '20px Arial';
-      ctx.fillText(`Session active...`, 10, 30);
-    }
-  }
+        const ctx = getElements().canvas.getContext('2d');
+        
+        if (!ctx) {
+            console.error("Canvas context not available");
+            return;
+        }
 
+        ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
+        
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Arial';
+        ctx.fillText(`Session active...`, 10, 30);
+        
+        // Draw the remaining time
+        ctx.fillText(`Time left: ${getRemainingTimeSession()} seconds`, 10, 60);
+        
+        // Get the current sound name using the getter and draw it if available
+        const currentSound = getCurrentSound();
+        if (currentSound) {
+            const currentSoundName = getCurrentSound().sound;
+            if (currentSoundName) {
+                ctx.fillText(`Playing: ${currentSoundName}`, 10, 90);
+            }
+        }
+
+    }
+}

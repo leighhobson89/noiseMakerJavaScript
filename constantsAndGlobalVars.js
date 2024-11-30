@@ -30,16 +30,16 @@ const samplesURLS = {
       6: { name: "dog6", url: "./resources/sounds/dog6.mp3" },
       7: { name: "dog7", url: "./resources/sounds/dog7.mp3" },
       8: { name: "dog8", url: "./resources/sounds/dog8.mp3" },
-      9: { name: "dog9", url: "./resources/sounds/dog9.mp3" },
-      10: { name: "dog10", url: "./resources/sounds/dog10.mp3" }
+      9: { name: "dog9", url: "./resources/sounds/dog9.mp3" }
     }
   };
 
 //GLOBAL VARIABLES
 let sessionActive = false;
-let sessionTimer = null;
 let sessionDuration = 0;
 let currentSound = null;
+let currentSoundName = '';
+let remainingTimeSession = null;
 
 //FLAGS
 let audioMuted;
@@ -195,16 +195,16 @@ export function getSessionActive() {
     return sessionActive;
 }
   
-export function setSessionActive(status) {
-    sessionActive = status;
+export function setSessionActive(value) {
+    sessionActive = value;
 }
   
-export function setSessionTimer(timer) {
-    sessionTimer = timer;
+export function setSessionTimer(value) {
+    sessionTimer = value;
 }
   
-export function setSessionDuration(duration) {
-    sessionDuration = duration;
+export function setSessionDuration(value) {
+    sessionDuration = value;
 }
 
 export function getSessionDuration() {
@@ -215,10 +215,26 @@ export function getCurrentSound() {
     return currentSound;
 }
   
-export function setCurrentSound(sound) {
-    currentSound = sound;
+export function setCurrentSound(value) {
+    currentSound = value;
 }
 
 export function getSampleURLS() {
     return samplesURLS;
+}
+
+export function getCurrentSoundName() {
+    return currentSoundName;
+}
+
+export function setCurrentSoundName(value) {
+    currentSoundName = value;
+}
+
+export function getRemainingTimeSession() {
+    return remainingTimeSession;
+}
+
+export function setRemainingTimeSession(value) {
+    remainingTimeSession = value;
 }
