@@ -1,18 +1,16 @@
-import { getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, getSessionActive, setSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getBeginGameStatus, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage } from './constantsAndGlobalVars.js';
-import { stopSessionTimer, stopWaitTimer, stopAllTimers, setGameState, startGame, gameLoop } from './game.js';
+import { getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage } from './constantsAndGlobalVars.js';
+import { stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
-import { startSession, stopSession } from './game.js';
+import { startSession } from './game.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
-    // Event listeners
     getElements().newGameMenuButton.addEventListener('click', async () => {
         setBeginGameStatus(true);
         if (!getGameInProgress()) {
             setGameInProgress(true);
         }
         setGameState(getGameVisiblePaused());
-        //PRE GAME START CODE HERE AFTER NEW GAME CLICKED
         startGame();
     });
 
@@ -88,7 +86,6 @@ export function updateCanvas() {
             }
         }
 
-        // Display Min and Max Session Time
         const minSessionTime = getMinSessionTime();
         const maxSessionTime = getMaxSessionTime();
         ctx.fillText(`Min Session Time: ${minSessionTime} seconds`, 10, 120);
@@ -102,7 +99,6 @@ export function updateCanvas() {
         ctx.fillText(`Countdown To Next Yapping Session...🤣🤣`, 10, 30);
         ctx.fillText(`Time left: ${remainingWaitTime} seconds`, 10, 60);
 
-        // Display Min and Max Wait Time
         const minWaitTime = getMinWaitTime();
         const maxWaitTime = getMaxWaitTime();
         ctx.fillText(`Min Wait Time: ${minWaitTime} seconds`, 10, 90);
