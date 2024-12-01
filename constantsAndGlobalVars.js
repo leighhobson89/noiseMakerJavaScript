@@ -15,6 +15,7 @@ export let gameState;
 export const MENU_STATE = 'menuState';
 export const GAME_VISIBLE_PAUSED = 'gameVisiblePaused';
 export const GAME_VISIBLE_ACTIVE = 'gameVisibleActive';
+export const THRESHOLD_DECIBEL_LEVEL_TO_START_YAPPING = 20;
 
 const samplesURLS = {
     samples: {
@@ -31,24 +32,24 @@ const samplesURLS = {
   };
 
 //GLOBAL VARIABLES
-let sessionActive = false;
 let sessionDuration = 0;
 let currentSound = null;
 let currentSoundName = '';
 let remainingTimeSession = null;
-let waitTimerActive = false;
 let decibelValue = 0;
-
 let maxWaitTime = 120;
 let minWaitTime = 60;
 let maxSessionTime = 6;
 let minSessionTime = 5;
 
 //FLAGS
-let audioMuted;
-let languageChangedFlag;
+let audioMuted = false;
+let languageChangedFlag = false;
 let beginGameState = true;
 let gameInProgress = false;
+let temporaryStopCheckingMicrophone = false;
+let waitTimerActive = false;
+let sessionActive = false;
 
 let autoSaveOn = false;
 export let pauseAutoSaveCountdown = true;
@@ -298,4 +299,16 @@ export function getDecibelLevel() {
 
 export function setDecibelLevel(value) {
     decibelValue = value;
+}
+
+export function getThresholdDecibelLevel() {
+    return THRESHOLD_DECIBEL_LEVEL_TO_START_YAPPING;
+}
+
+export function setTemporaryStopCheckingMicrophone(value) {
+    temporaryStopCheckingMicrophone = value;
+}
+
+export function getTemporaryStopCheckingMicrophone() {
+    return temporaryStopCheckingMicrophone;
 }
