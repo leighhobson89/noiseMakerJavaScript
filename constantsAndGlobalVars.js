@@ -15,10 +15,6 @@ export let gameState;
 export const MENU_STATE = 'menuState';
 export const GAME_VISIBLE_PAUSED = 'gameVisiblePaused';
 export const GAME_VISIBLE_ACTIVE = 'gameVisibleActive';
-export const NUMBER_OF_ENEMY_SQUARES = 10;
-export const INITIAL_SPEED_PLAYER = 4;
-export const INITIAL_SPEED_MOVING_ENEMY = 4;
-export const MAX_ATTEMPTS_TO_DRAW_ENEMIES = 1000;
 
 const samplesURLS = {
     samples: {
@@ -41,11 +37,12 @@ let currentSound = null;
 let currentSoundName = '';
 let remainingTimeSession = null;
 let waitTimerActive = false;
+let decibelValue = 0;
 
 let maxWaitTime = 120;
 let minWaitTime = 60;
-let maxSessionTime = 60;
-let minSessionTime = 20;
+let maxSessionTime = 6;
+let minSessionTime = 5;
 
 //FLAGS
 let audioMuted;
@@ -293,4 +290,12 @@ export function getMinSessionTime() {
 
 export function setMinSessionTime(value) {
     minSessionTime = value;
+}
+
+export function getDecibelLevel() {
+    return decibelValue;
+}
+
+export function setDecibelLevel(value) {
+    decibelValue = value;
 }

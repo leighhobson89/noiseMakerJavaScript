@@ -152,14 +152,14 @@ canvas {
 
 .floating-gif {
     position: fixed;
-    top: 50%;
+    top: 65%;
     left: 50%;
     transform: translateX(-50%);
     z-index: 9999;
   }
 
   .floating-gif img {
-    max-width: 400px;  /* You can set the size of the gif here */
+    max-width: 200px;  /* You can set the size of the gif here */
     height: auto;      /* Maintain aspect ratio */
   }
 

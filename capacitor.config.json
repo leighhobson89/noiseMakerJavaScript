@@ -4,6 +4,9 @@
   "webDir": "www",
   "bundledWebRuntime": false,
   "android": {
-    "icon": "./resources/iconYapping.png"
+    "icon": "./resources/iconYapping.png",
+    "permissions": [
+      "android.permission.RECORD_AUDIO"
+    ]
   }
 }

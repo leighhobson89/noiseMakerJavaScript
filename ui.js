@@ -1,9 +1,39 @@
-import { getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage } from './constantsAndGlobalVars.js';
+import { getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage } from './constantsAndGlobalVars.js';
 import { stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+
+    const checkPermission = async () => {
+        if (window.Capacitor) {
+            const { Platform } = await import('@capacitor/core');
+            if (Platform.is('android')) {
+                const { Permissions } = await import('@capacitor/core');
+                const { status } = await Permissions.query({ name: 'microphone' });
+
+                if (status === 'granted') {
+                    console.log('Microphone access granted');
+                } else if (status === 'denied') {
+                    console.log('Microphone access denied');
+                    const { granted } = await Permissions.request({ name: 'microphone' });
+
+                    if (granted) {
+                        console.log('Microphone access granted');
+                    } else {
+                        console.log('Microphone access denied by the user');
+                    }
+                }
+            } else {
+                console.log('Not on Android, skipping microphone permission check.');
+            }
+        } else {
+            console.log('Not in a Capacitor environment, skipping microphone permission check.');
+        }
+    };
+
+    checkPermission();
+
     setElements();
     getElements().newGameMenuButton.addEventListener('click', async () => {
         setBeginGameStatus(true);
@@ -71,8 +101,11 @@ export function disableActivateButton(button, action, activeClass) {
 export function updateCanvas() {
     const ctx = getElements().canvas.getContext('2d');
 
+    // Start by clearing the canvas
+    ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
+
+    // Display session status
     if (getSessionActive()) {
-        ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
         ctx.fillText(`Yapping Session Active...🤣🤣🤣`, 10, 30);
@@ -80,7 +113,7 @@ export function updateCanvas() {
 
         const currentSound = getCurrentSound();
         if (currentSound) {
-            const currentSoundName = getCurrentSound().sound;
+            const currentSoundName = currentSound.sound;
             if (currentSoundName) {
                 ctx.fillText(`Playing: ${currentSoundName}`, 10, 90);
             }
@@ -90,10 +123,10 @@ export function updateCanvas() {
         const maxSessionTime = getMaxSessionTime();
         ctx.fillText(`Min Session Time: ${minSessionTime} seconds`, 10, 120);
         ctx.fillText(`Max Session Time: ${maxSessionTime} seconds`, 10, 150);
-
-    } else if (getWaitTimerActive()) {
+    } 
+    // Display wait timer status
+    else if (getWaitTimerActive()) {
         const remainingWaitTime = getRemainingTimeSession();
-        ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
         ctx.fillText(`Countdown To Next Yapping Session...🤣🤣`, 10, 30);
@@ -103,5 +136,7 @@ export function updateCanvas() {
         const maxWaitTime = getMaxWaitTime();
         ctx.fillText(`Min Wait Time: ${minWaitTime} seconds`, 10, 90);
         ctx.fillText(`Max Wait Time: ${maxWaitTime} seconds`, 10, 120);
+
+        ctx.fillText(`Current Noise Level: ${Math.round(getDecibelLevel())} dB`, 10, 180);
     }
 }

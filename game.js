@@ -1,5 +1,5 @@
 import { localize } from './localization.js';
-import { getMaxWaitTime, setMaxWaitTime, getMinWaitTime, setMinWaitTime, getMaxSessionTime, setMaxSessionTime, getMinSessionTime, setMinSessionTime, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, setCurrentSoundName, getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState, setWaitTimerActive } from './constantsAndGlobalVars.js';
+import { getDecibelLevel, setDecibelLevel, getMaxWaitTime, setMaxWaitTime, getMinWaitTime, setMinWaitTime, getMaxSessionTime, setMaxSessionTime, getMinSessionTime, setMinSessionTime, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, setCurrentSoundName, getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState, setWaitTimerActive, getSessionActive } from './constantsAndGlobalVars.js';
 import { updateCanvas } from './ui.js';
 
 let sessionTimer;
@@ -128,8 +128,11 @@ export async function gameLoop() {
         ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
 
         if (gameState === getGameVisibleActive()) {
-            updateCanvas();
-            updateWaitTimerValues();
+          if (!getSessionActive()) {
+            updateDecibelLevel();
+          }
+          updateCanvas();
+          updateWaitTimerValues();
         }
 
         requestAnimationFrame(gameLoop);
@@ -167,6 +170,8 @@ export async function stopSession() {
   getElements().waitingDogImg.classList.remove('d-none');
 
   startWaitTimer();
+  initializeMicrophoneListener();
+  //initializeAudioFileListener('./resources/sounds/ambience1.mp3');
 }
 
 export function startWaitTimer() {
@@ -180,6 +185,7 @@ export function startWaitTimer() {
       if (remainingWaitTime <= 0) {
           clearInterval(waitTimer);
           setWaitTimerActive(false);
+          stopMicrophone();
           startSession();
       }
   }, 1000);
@@ -217,6 +223,93 @@ export function stopAllTimers() {
   stopSessionTimer();
   stopWaitTimer();
 }
+
+//-------------------------------------MIC--------------------------------------------------
+let audioContext;
+let analyser;
+let dataArray;
+let micStream;
+let audioElement;
+
+function initializeAudioFileListener(filePath) {
+    // Create an audio element to simulate microphone input
+    audioElement = new Audio(filePath);
+
+    // Set the audio to loop
+    audioElement.loop = true;
+
+    // Wait for the audio to load
+    audioElement.addEventListener('canplaythrough', () => {
+        // Create an audio context
+        audioContext = new (window.AudioContext)();
+
+        // Create a MediaElementAudioSourceNode to simulate the microphone stream
+        const source = audioContext.createMediaElementSource(audioElement);
+
+        // Create an analyser node for frequency data
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        // Connect the source to the analyser
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        // Start the audio file playback
+        audioElement.play();
+        console.log('Audio file initialized and looping');
+    });
+
+    audioElement.src = filePath;
+    audioElement.load();
+}
+
+function initializeMicrophoneListener() {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                micStream = stream;
+                audioContext = new (window.AudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                source.connect(analyser);
+                console.log('Microphone initialized');
+            })
+            .catch(err => {
+                console.error('Error accessing microphone:', err);
+            });
+    } else {
+        console.error('Browser does not support getUserMedia');
+    }
+}
+
+function updateDecibelLevel() {
+    if (analyser) {
+        analyser.getByteFrequencyData(dataArray);
+
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+        }
+        const decibelLevel = (sum / dataArray.length).toFixed(1);
+        setDecibelLevel(decibelLevel);
+    }
+}
+
+function stopMicrophone() {
+    if (micStream) {
+        const tracks = micStream.getTracks();
+        tracks.forEach(track => track.stop());
+        micStream = null;
+        console.log('Microphone stopped');
+    } else {
+        console.log('No microphone stream to stop');
+    }
+}
+
+//------------------------------------------------------------------------------------------
 
 
 export function setGameState(newState) {
