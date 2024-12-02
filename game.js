@@ -355,11 +355,24 @@ function stopMicrophone() {
         const tracks = micStream.getTracks();
         tracks.forEach(track => track.stop());
         micStream = null;
-        console.log('Microphone stopped');
-    } else {
-        console.log('No microphone stream to stop');
+        console.log('Microphone stream stopped');
     }
+
+    if (audioContext) {
+        if (audioContext.state !== 'closed') {
+            audioContext.close().then(() => {
+                console.log('AudioContext closed');
+            });
+        }
+        audioContext = null;
+    }
+
+    analyser = null;
+    dataArray = null;
+
+    console.log('Microphone and audio resources cleaned up');
 }
+
 
 //------------------------------------------------------------------------------------------
 
