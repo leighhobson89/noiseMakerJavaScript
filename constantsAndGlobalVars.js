@@ -40,7 +40,7 @@ let maxWaitTime = 120;
 let minWaitTime = 60;
 let maxSessionTime = 6;
 let minSessionTime = 5;
-let thresholdDecibelLevelToStartYapping = 45;
+let thresholdDecibelLevelToStartYapping = 60;
 let highestdBSuffered = 0.0;
 
 //FLAGS

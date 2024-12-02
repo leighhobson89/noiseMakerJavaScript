@@ -77,7 +77,7 @@ export function updateCanvas() {
         ctx.font = '20px Arial';
         ctx.fillText(`Yapping Session Active...🤣🤣🤣`, 10, 30);
         if (getRemainingTimeSession() !== null) {
-            ctx.fillText(`I'm going to be Yapping for the next ${getRemainingTimeSession()} seconds`, 10, 60);
+            ctx.fillText(`Yapping for the next ${getRemainingTimeSession()} seconds`, 10, 60);
         }
     } 
     // Display wait timer status
@@ -85,24 +85,42 @@ export function updateCanvas() {
         const remainingWaitTime = getRemainingTimeSession();
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
-        ctx.fillText(`Countdown To Next Yapping Session...${remainingWaitTime} seconds🤣🤣`, 10, 30);
+        ctx.fillText(`Next Yapping Session...${remainingWaitTime} seconds🤣🤣`, 10, 30);
         ctx.fillText(`Will Yap at: ${getThresholdDecibelLevel()}dB`, 10, 90);
-        ctx.fillText(`Highest dB suffered: ${getHighestdBSuffered()}dB`, 10, 120);
 
-        const decibelLevel = getDecibelLevel();
-        let noiseColor = 'white';  // Default color
-
+        // Determine color for the highest dB suffered
+        const highestdB = getHighestdBSuffered();
         const threshold = getThresholdDecibelLevel();
+        let highestdBColor = 'white'; // Default color
+
+        if (highestdB < threshold / 2) {
+            highestdBColor = 'green'; // Green if less than half of the threshold
+        } else if (highestdB < threshold * 0.9) {
+            highestdBColor = 'orange'; // Orange if less than 90% of the threshold
+        } else {
+            highestdBColor = 'red'; // Red if greater than or equal to 90%
+        }
+
+        // Render "Highest dB suffered" text
+        ctx.fillStyle = highestdBColor;
+        ctx.fillText(`Highest dB suffered: ${highestdB}dB`, 10, 120);
+
+        // Determine color for current noise level
+        const decibelLevel = getDecibelLevel();
+        let noiseColor = 'white'; // Default color
+
         if (decibelLevel < threshold / 2) {
             noiseColor = 'green'; // Green if less than half of the threshold
         } else if (decibelLevel < threshold * 0.9) {
             noiseColor = 'orange'; // Orange if less than 90% of the threshold
-        } else if (decibelLevel <= threshold) {
-            noiseColor = 'red'; // Red if the decibel level is at or above the threshold
+        } else {
+            noiseColor = 'red'; // Red if greater than or equal to 90%
         }
 
+        // Render "Current Noise Level" text
         ctx.fillStyle = noiseColor;
         ctx.fillText(`Current Noise Level: ${Math.round(decibelLevel)} dB`, 10, 150);
     }
 }
+
 
