@@ -152,22 +152,34 @@ canvas {
 
 .floating-gif {
     position: fixed;
-    top: 65%;
+    top: 70%;
     left: 50%;
     transform: translateX(-50%);
     z-index: 9999;
   }
 
   .floating-gif img {
-    max-width: 200px;  /* You can set the size of the gif here */
+    max-width: 150px;  /* You can set the size of the gif here */
     height: auto;      /* Maintain aspect ratio */
   }
 
-  #floatingContainer {
+  #floatingContainerLeft {
     position: fixed;
     top: 0;
     left: 0;
-    width: 150px;
+    width: 100px;
+    height: 100vh;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#floatingContainerRight {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100px;
     height: 100vh;
     z-index: 10;
     display: flex;
@@ -176,13 +188,13 @@ canvas {
 }
 
 #innerContainer {
-    width: 80%;
+    width: 95%;
     height: 60%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.left-column-elements {
+.side-bars-elements {
     font-size: 0.8rem;
 }

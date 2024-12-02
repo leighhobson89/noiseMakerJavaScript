@@ -1,4 +1,4 @@
-import { getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage } from './constantsAndGlobalVars.js';
+import { getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel } from './constantsAndGlobalVars.js';
 import { stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
@@ -102,12 +102,22 @@ export function updateCanvas() {
         ctx.font = '20px Arial';
         ctx.fillText(`Countdown To Next Yapping Session...🤣🤣`, 10, 30);
         ctx.fillText(`Time left: ${remainingWaitTime} seconds`, 10, 60);
+        ctx.fillText(`Will Yap at: ${getThresholdDecibelLevel()}dB`, 10, 120);
 
-        const minWaitTime = getMinWaitTime();
-        const maxWaitTime = getMaxWaitTime();
-        ctx.fillText(`Min Wait Time: ${minWaitTime} seconds`, 10, 90);
-        ctx.fillText(`Max Wait Time: ${maxWaitTime} seconds`, 10, 120);
+        const decibelLevel = getDecibelLevel();
+        let noiseColor = 'white';  // Default color
 
-        ctx.fillText(`Current Noise Level: ${Math.round(getDecibelLevel())} dB`, 10, 180);
+        const threshold = getThresholdDecibelLevel();
+        if (decibelLevel < threshold / 2) {
+            noiseColor = 'green'; // Green if less than half of the threshold
+        } else if (decibelLevel < threshold * 0.9) {
+            noiseColor = 'orange'; // Orange if less than 90% of the threshold
+        } else if (decibelLevel <= threshold) {
+            noiseColor = 'red'; // Red if the decibel level is at or above the threshold
+        }
+
+        ctx.fillStyle = noiseColor;
+        ctx.fillText(`Current Noise Level: ${Math.round(decibelLevel)} dB`, 10, 150);
     }
 }
+

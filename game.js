@@ -1,5 +1,5 @@
 import { localize } from './localization.js';
-import { setTemporaryStopCheckingMicrophone, getTemporaryStopCheckingMicrophone, getThresholdDecibelLevel, getDecibelLevel, setDecibelLevel, getMaxWaitTime, setMaxWaitTime, getMinWaitTime, setMinWaitTime, getMaxSessionTime, setMaxSessionTime, getMinSessionTime, setMinSessionTime, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, setCurrentSoundName, getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState, setWaitTimerActive, getSessionActive } from './constantsAndGlobalVars.js';
+import { setThresholdDecibelLevel, setMicrophonePermissionGranted, getMicrophonePermissionGranted, setTemporaryStopCheckingMicrophone, getTemporaryStopCheckingMicrophone, getThresholdDecibelLevel, getDecibelLevel, setDecibelLevel, getMaxWaitTime, setMaxWaitTime, getMinWaitTime, setMinWaitTime, getMaxSessionTime, setMaxSessionTime, getMinSessionTime, setMinSessionTime, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, setCurrentSoundName, getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState, setWaitTimerActive, getSessionActive } from './constantsAndGlobalVars.js';
 import { updateCanvas } from './ui.js';
 
 let sessionTimer;
@@ -7,7 +7,7 @@ let waitTimer;
 let sessionStartTime;
 let sessionDuration;
 
-export function startGame() {
+export async function startGame() {
     const ctx = getElements().canvas.getContext('2d');
     const container = getElements().canvasContainer;
 
@@ -33,6 +33,7 @@ export function startGame() {
     }
     setGameState(getGameVisibleActive());
 
+    await checkMicrophonePermission();
     gameLoop();
 }
 
@@ -42,6 +43,7 @@ function initialiseSideBarElements() {
   getElements().maxWaitTimeField.value = getMaxWaitTime();
   getElements().minSessionTimeField.value = getMinSessionTime();
   getElements().maxSessionTimeField.value = getMaxSessionTime();
+  getElements().thresholddB.value = getThresholdDecibelLevel();
 
   getElements().minWaitTimeLabel.classList.remove('d-none');
   getElements().maxWaitTimeLabel.classList.remove('d-none');
@@ -53,72 +55,83 @@ function initialiseSideBarElements() {
   getElements().minSessionTimeField.classList.remove('d-none');
   getElements().maxSessionTimeField.classList.remove('d-none');
 
+  getElements().thresholddBLabel.classList.remove('d-none');
+  getElements().thresholddB.classList.remove('d-none');
+
 }
 
-export function updateWaitTimerValues() {
-  const minWaitTimeField = getElements().minWaitTimeField;
-  const maxWaitTimeField = getElements().maxWaitTimeField;
-  const minSessionTimeField = getElements().minSessionTimeField;
-  const maxSessionTimeField = getElements().maxSessionTimeField;
-
-  const minWaitTimeValue = parseInt(minWaitTimeField.value);
-  const maxWaitTimeValue = parseInt(maxWaitTimeField.value);
-  const minSessionTimeValue = parseInt(minSessionTimeField.value);
-  const maxSessionTimeValue = parseInt(maxSessionTimeField.value);
-
-  // Check for valid min/max values and update accordingly
-  let validMinWait = true;
-  let validMaxWait = true;
-  let validMinSession = true;
-  let validMaxSession = true;
-
-  // Validate Wait Time values
-  if (!isNaN(minWaitTimeValue) && minWaitTimeValue > maxWaitTimeValue) {
-      minWaitTimeField.style.color = 'red';
-      validMinWait = false;
-  } else {
-      minWaitTimeField.style.color = 'black';
+export function updateInputFieldValues() {
+    const minWaitTimeField = getElements().minWaitTimeField;
+    const maxWaitTimeField = getElements().maxWaitTimeField;
+    const minSessionTimeField = getElements().minSessionTimeField;
+    const maxSessionTimeField = getElements().maxSessionTimeField;
+    const thresholddBField = getElements().thresholddB;
+  
+    const minWaitTimeValue = parseInt(minWaitTimeField.value);
+    const maxWaitTimeValue = parseInt(maxWaitTimeField.value);
+    const minSessionTimeValue = parseInt(minSessionTimeField.value);
+    const maxSessionTimeValue = parseInt(maxSessionTimeField.value);
+    const thresholddBValue = parseInt(thresholddBField.value);
+  
+    // Check for valid min/max values and update accordingly
+    let validMinWait = true;
+    let validMaxWait = true;
+    let validMinSession = true;
+    let validMaxSession = true;
+  
+    // Validate Wait Time values
+    if (!isNaN(minWaitTimeValue) && minWaitTimeValue > maxWaitTimeValue) {
+        minWaitTimeField.style.color = 'red';
+        validMinWait = false;
+    } else {
+        minWaitTimeField.style.color = 'black';
+    }
+  
+    if (!isNaN(maxWaitTimeValue) && maxWaitTimeValue < minWaitTimeValue) {
+        maxWaitTimeField.style.color = 'red';
+        validMaxWait = false;
+    } else {
+        maxWaitTimeField.style.color = 'black';
+    }
+  
+    // Validate Session Time values
+    if (!isNaN(minSessionTimeValue) && minSessionTimeValue > maxSessionTimeValue) {
+        minSessionTimeField.style.color = 'red';
+        validMinSession = false;
+    } else {
+        minSessionTimeField.style.color = 'black';
+    }
+  
+    if (!isNaN(maxSessionTimeValue) && maxSessionTimeValue < minSessionTimeValue) {
+        maxSessionTimeField.style.color = 'red';
+        validMaxSession = false;
+    } else {
+        maxSessionTimeField.style.color = 'black';
+    }
+  
+    // Update values only if valid
+    if (validMinWait) {
+        setMinWaitTime(minWaitTimeValue);
+    }
+  
+    if (validMaxWait) {
+        setMaxWaitTime(maxWaitTimeValue);
+    }
+  
+    if (validMinSession) {
+        setMinSessionTime(minSessionTimeValue);
+    }
+  
+    if (validMaxSession) {
+        setMaxSessionTime(maxSessionTimeValue);
+    }
+  
+    // Update the threshold decibel level (no validation needed)
+    if (!isNaN(thresholddBValue)) {
+        setThresholdDecibelLevel(thresholddBValue);
+    }
   }
-
-  if (!isNaN(maxWaitTimeValue) && maxWaitTimeValue < minWaitTimeValue) {
-      maxWaitTimeField.style.color = 'red';
-      validMaxWait = false;
-  } else {
-      maxWaitTimeField.style.color = 'black';
-  }
-
-  // Validate Session Time values
-  if (!isNaN(minSessionTimeValue) && minSessionTimeValue > maxSessionTimeValue) {
-      minSessionTimeField.style.color = 'red';
-      validMinSession = false;
-  } else {
-      minSessionTimeField.style.color = 'black';
-  }
-
-  if (!isNaN(maxSessionTimeValue) && maxSessionTimeValue < minSessionTimeValue) {
-      maxSessionTimeField.style.color = 'red';
-      validMaxSession = false;
-  } else {
-      maxSessionTimeField.style.color = 'black';
-  }
-
-  // Update values only if valid
-  if (validMinWait) {
-      setMinWaitTime(minWaitTimeValue);
-  }
-
-  if (validMaxWait) {
-      setMaxWaitTime(maxWaitTimeValue);
-  }
-
-  if (validMinSession) {
-      setMinSessionTime(minSessionTimeValue);
-  }
-
-  if (validMaxSession) {
-      setMaxSessionTime(maxSessionTimeValue);
-  }
-}
+  
 
 
 
@@ -142,7 +155,7 @@ export async function gameLoop() {
             }
           }
           updateCanvas();
-          updateWaitTimerValues();
+          updateInputFieldValues();
         }
 
         requestAnimationFrame(gameLoop);
@@ -240,54 +253,63 @@ let audioContext;
 let analyser;
 let dataArray;
 let micStream;
-let permissionChecked = false;
-let microphonePermissionGranted = false;
 
 async function checkMicrophonePermission() {
-    if (permissionChecked) {
-        // If we've already checked or requested permission, skip
-        console.log('Permission already checked');
-        return;
-    }
+    const platform = Capacitor.getPlatform();  // Get the current platform (web, android, ios)
 
+    // Check if the browser supports mediaDevices.getUserMedia (for web platforms)
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
-            // Check if the microphone permission is already granted
-            const { status } = await Permissions.query({ name: 'microphone' });
+            // Check platform type and handle permissions accordingly
+            if (platform === 'web') {
+                console.log('Running on the web, skipping permission request');
+                // On web, directly attempt to access the microphone without requesting permission
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                if (stream) {
+                    console.log('Microphone access granted on web');
+                    setMicrophonePermissionGranted(true);
+                    stream.getTracks().forEach(track => track.stop());  // Stop the stream after access
+                }
+            } else {
+                console.log('Running on a native platform, attempting to access the microphone');
+                
+                // For Android and iOS, try to access the microphone directly via getUserMedia
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-            if (status === 'granted') {
-                console.log('Microphone access granted');
-                microphonePermissionGranted = true;  // Mark permission as granted
-            } else if (status === 'denied') {
-                console.log('Microphone access denied');
-                const { granted } = await Permissions.request({ name: 'microphone' });
-                if (granted) {
-                    console.log('Microphone access granted after request');
-                    microphonePermissionGranted = true;  // Mark permission as granted
+                if (stream) {
+                    console.log('Microphone access granted on native platform');
+                    setMicrophonePermissionGranted(true);
+                    stream.getTracks().forEach(track => track.stop());  // Stop the stream after access
                 } else {
-                    console.log('Microphone access denied by the user');
-                    return;
+                    console.log('Microphone access denied on native platform');
                 }
             }
-            permissionChecked = true; // Mark that we've checked/requested the permission
+
+            // Handle the case where permission was granted or denied
+            if (getMicrophonePermissionGranted()) {
+                // Add any additional logic here, for example, starting a microphone recording, etc.
+                console.log('You can now use the microphone');
+            } else {
+                console.log('Permission to access the microphone was denied');
+            }
+
         } catch (err) {
-            console.error('Error accessing microphone permission:', err);
-            permissionChecked = true; // If there's an error, still mark the permission as checked
-            return;
+            console.error('Error checking or requesting microphone permission:', err);
+            // Optionally log error message and name for more details
+            console.error('Error name:', err.name);
+            console.error('Error message:', err.message);
         }
     } else {
         console.error('Browser does not support getUserMedia');
-        permissionChecked = true; // Mark that we've checked even if it's not supported
-        return;
     }
 }
 
+
 async function initializeMicrophoneListener() {
     // First, check if the permission is granted
-    await checkMicrophonePermission();
 
     // If permission is granted, initialize the microphone listener
-    if (microphonePermissionGranted) {
+    if (getMicrophonePermissionGranted()) {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             micStream = stream;

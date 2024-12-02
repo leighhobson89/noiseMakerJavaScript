@@ -4,16 +4,19 @@
     "main": "server.js",
     "scripts": {
         "start": "node server.js",
-  "build": "node build.js",
-  "build:android": "npm run build && npx cap add android && npx cap sync android && npx cap open android"
+        "build": "node build.js",
+        "build:android": "npm run build && npx cap add android && npx cap sync android && npx cap open android"
     },
     "dependencies": {
-        "@capacitor/android": "^6.2.0",
-        "@capacitor/cli": "^6.2.0",
+        "@capacitor-community/media": "^7.0.0",
         "@capacitor/core": "^6.2.0",
+        "@mozartec/capacitor-microphone": "^6.0.0",
+        "capacitor-plugin-permissions": "^1.0.0",
         "express": "^4.18.2"
     },
     "devDependencies": {
+        "@capacitor/android": "^6.2.0",
+        "@capacitor/cli": "^6.2.0",
         "fs-extra": "^11.2.0"
     }
 }

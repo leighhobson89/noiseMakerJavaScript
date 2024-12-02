@@ -2,11 +2,12 @@
   "appId": "com.example.app",
   "appName": "Yap! Yap! Yap!",
   "webDir": "www",
-  "bundledWebRuntime": true,
+  "bundledWebRuntime": false,
   "android": {
     "icon": "./resources/iconYapping.png",
     "permissions": [
-      "android.permission.RECORD_AUDIO"
+      "android.permission.RECORD_AUDIO",
+      "android.permission.MODIFY_AUDIO_SETTINGS"
     ]
   }
 }

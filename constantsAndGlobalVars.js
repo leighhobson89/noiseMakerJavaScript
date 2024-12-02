@@ -15,7 +15,6 @@ export let gameState;
 export const MENU_STATE = 'menuState';
 export const GAME_VISIBLE_PAUSED = 'gameVisiblePaused';
 export const GAME_VISIBLE_ACTIVE = 'gameVisibleActive';
-export const THRESHOLD_DECIBEL_LEVEL_TO_START_YAPPING = 20;
 
 const samplesURLS = {
     samples: {
@@ -41,6 +40,7 @@ let maxWaitTime = 120;
 let minWaitTime = 60;
 let maxSessionTime = 6;
 let minSessionTime = 5;
+let thresholdDecibelLevelToStartYapping = 45;
 
 //FLAGS
 let audioMuted = false;
@@ -50,6 +50,7 @@ let gameInProgress = false;
 let temporaryStopCheckingMicrophone = false;
 let waitTimerActive = false;
 let sessionActive = false;
+let microphonePermissionGranted = false;
 
 let autoSaveOn = false;
 export let pauseAutoSaveCountdown = true;
@@ -77,6 +78,8 @@ export function setElements() {
         maxWaitTimeField: document.getElementById('maxWaitTimeField'),
         minSessionTimeField: document.getElementById('minSessionTimeField'),
         maxSessionTimeField: document.getElementById('maxSessionTimeField'),
+        thresholddBLabel: document.querySelector('label[for="thresholddBField"]'),
+        thresholddB: document.getElementById('thresholddBField')
     };
 }
 
@@ -302,7 +305,11 @@ export function setDecibelLevel(value) {
 }
 
 export function getThresholdDecibelLevel() {
-    return THRESHOLD_DECIBEL_LEVEL_TO_START_YAPPING;
+    return thresholdDecibelLevelToStartYapping;
+}
+
+export function setThresholdDecibelLevel(value) {
+    thresholdDecibelLevelToStartYapping = value;
 }
 
 export function setTemporaryStopCheckingMicrophone(value) {
@@ -311,4 +318,12 @@ export function setTemporaryStopCheckingMicrophone(value) {
 
 export function getTemporaryStopCheckingMicrophone() {
     return temporaryStopCheckingMicrophone;
+}
+
+export function setMicrophonePermissionGranted(value) {
+    microphonePermissionGranted = value;
+}
+
+export function getMicrophonePermissionGranted() {
+    return microphonePermissionGranted;
 }

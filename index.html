@@ -25,29 +25,36 @@
       <img src="./resources/images/waiting.gif" alt="Floating Animation">
     </div>
 
-    <div id="floatingContainer">
+    <div id="floatingContainerLeft">
         <div id="innerContainer">
             <div class="input-container">
-                <label for="minSessionTimeField" class="d-none form-label left-column-elements">Min Yapping Time</label>
-                <input id="minSessionTimeField" type="number" class="d-none form-control left-column-elements" placeholder="Enter Min Session Time">
+                <label for="minSessionTimeField" class="d-none form-label side-bars-elements">Min Yapping</label>
+                <input id="minSessionTimeField" type="number" class="d-none form-control side-bars-elements" placeholder="Enter Min Session Time">
             </div>
             <div class="input-container">
-                <label for="maxSessionTimeField" class="d-none form-label left-column-elements">Max Yapping Time</label>
-                <input id="maxSessionTimeField" type="number" class="d-none form-control left-column-elements" placeholder="Enter Max Session Time">
+                <label for="maxSessionTimeField" class="d-none form-label side-bars-elements">Max Yapping</label>
+                <input id="maxSessionTimeField" type="number" class="d-none form-control side-bars-elements" placeholder="Enter Max Session Time">
             </div>
             <div class="input-container">
-                <label for="minWaitTimeField" class="d-none form-label left-column-elements">Min Cooldown Time</label>
-                <input id="minWaitTimeField" type="number" class="d-none form-control left-column-elements" placeholder="Enter Min Wait Time">
+                <label for="minWaitTimeField" class="d-none form-label side-bars-elements">Min Cooldown</label>
+                <input id="minWaitTimeField" type="number" class="d-none form-control side-bars-elements" placeholder="Enter Min Wait Time">
             </div>
             <div class="input-container">
-                <label for="maxWaitTimeField" class="d-none form-label left-column-elements">Max Cooldown Time</label>
-                <input id="maxWaitTimeField" type="number" class="d-none form-control left-column-elements" placeholder="Enter Max Wait Time">
+                <label for="maxWaitTimeField" class="d-none form-label side-bars-elements">Max Cooldown</label>
+                <input id="maxWaitTimeField" type="number" class="d-none form-control side-bars-elements" placeholder="Enter Max Wait Time">
+            </div>
+        </div>
+    </div>
+
+    <div id="floatingContainerRight">
+        <div id="innerContainer">
+            <div class="input-container">
+                <label for="thresholddBField" class="d-none form-label side-bars-elements">Threshold dB</label>
+                <input id="thresholddBField" type="number" class="d-none form-control side-bars-elements" placeholder="Enter Threshold dB">
             </div>
         </div>
     </div>
     
-       
-
     <!-- Canvas Container -->
     <div id="canvasContainer" class="d-none">
         <!-- Button Row -->
@@ -62,10 +69,7 @@
         </div>
     </div>
 
-    <script type="module">
-        import { Capacitor } from '@capacitor/core';
-        console.log(Capacitor);
-    </script>
+    <script type="module" src="capacitor.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
