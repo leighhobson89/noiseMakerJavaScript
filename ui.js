@@ -5,35 +5,6 @@ import { startSession } from './game.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    const checkPermission = async () => {
-        if (window.Capacitor) {
-            const { Platform } = await import('@capacitor/core');
-            if (Platform.is('android')) {
-                const { Permissions } = await import('@capacitor/core');
-                const { status } = await Permissions.query({ name: 'microphone' });
-
-                if (status === 'granted') {
-                    console.log('Microphone access granted');
-                } else if (status === 'denied') {
-                    console.log('Microphone access denied');
-                    const { granted } = await Permissions.request({ name: 'microphone' });
-
-                    if (granted) {
-                        console.log('Microphone access granted');
-                    } else {
-                        console.log('Microphone access denied by the user');
-                    }
-                }
-            } else {
-                console.log('Not on Android, skipping microphone permission check.');
-            }
-        } else {
-            console.log('Not in a Capacitor environment, skipping microphone permission check.');
-        }
-    };
-
-    checkPermission();
-
     setElements();
     getElements().newGameMenuButton.addEventListener('click', async () => {
         setBeginGameStatus(true);

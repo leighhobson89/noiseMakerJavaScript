@@ -2,7 +2,7 @@
   "appId": "com.example.app",
   "appName": "Yap! Yap! Yap!",
   "webDir": "www",
-  "bundledWebRuntime": false,
+  "bundledWebRuntime": true,
   "android": {
     "icon": "./resources/iconYapping.png",
     "permissions": [

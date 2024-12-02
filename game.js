@@ -240,9 +240,54 @@ let audioContext;
 let analyser;
 let dataArray;
 let micStream;
+let permissionChecked = false;
+let microphonePermissionGranted = false;
+
+async function checkMicrophonePermission() {
+    if (permissionChecked) {
+        // If we've already checked or requested permission, skip
+        console.log('Permission already checked');
+        return;
+    }
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+            // Check if the microphone permission is already granted
+            const { status } = await Permissions.query({ name: 'microphone' });
+
+            if (status === 'granted') {
+                console.log('Microphone access granted');
+                microphonePermissionGranted = true;  // Mark permission as granted
+            } else if (status === 'denied') {
+                console.log('Microphone access denied');
+                const { granted } = await Permissions.request({ name: 'microphone' });
+                if (granted) {
+                    console.log('Microphone access granted after request');
+                    microphonePermissionGranted = true;  // Mark permission as granted
+                } else {
+                    console.log('Microphone access denied by the user');
+                    return;
+                }
+            }
+            permissionChecked = true; // Mark that we've checked/requested the permission
+        } catch (err) {
+            console.error('Error accessing microphone permission:', err);
+            permissionChecked = true; // If there's an error, still mark the permission as checked
+            return;
+        }
+    } else {
+        console.error('Browser does not support getUserMedia');
+        permissionChecked = true; // Mark that we've checked even if it's not supported
+        return;
+    }
+}
 
 async function initializeMicrophoneListener() {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    // First, check if the permission is granted
+    await checkMicrophonePermission();
+
+    // If permission is granted, initialize the microphone listener
+    if (microphonePermissionGranted) {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             micStream = stream;
@@ -253,7 +298,7 @@ async function initializeMicrophoneListener() {
             dataArray = new Uint8Array(analyser.frequencyBinCount);
             source.connect(analyser);
 
-            // Adding a 5-second timeout to allow the mic to normalize
+            // Adding a 2.5-second timeout to allow the mic to normalize
             await new Promise(resolve => setTimeout(resolve, 2500));
 
             console.log('Microphone initialized');
@@ -261,7 +306,7 @@ async function initializeMicrophoneListener() {
             console.error('Error accessing microphone:', err);
         }
     } else {
-        console.error('Browser does not support getUserMedia');
+        console.error('Microphone permission not granted');
     }
 }
 
