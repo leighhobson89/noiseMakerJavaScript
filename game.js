@@ -1,5 +1,5 @@
 import { localize } from './localization.js';
-import { setThresholdDecibelLevel, setMicrophonePermissionGranted, getMicrophonePermissionGranted, setTemporaryStopCheckingMicrophone, getTemporaryStopCheckingMicrophone, getThresholdDecibelLevel, getDecibelLevel, setDecibelLevel, getMaxWaitTime, setMaxWaitTime, getMinWaitTime, setMinWaitTime, getMaxSessionTime, setMaxSessionTime, getMinSessionTime, setMinSessionTime, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, setCurrentSoundName, getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState, setWaitTimerActive, getSessionActive } from './constantsAndGlobalVars.js';
+import { setHighestdBSuffered, getHighestdBSuffered, setThresholdDecibelLevel, setMicrophonePermissionGranted, getMicrophonePermissionGranted, setTemporaryStopCheckingMicrophone, getTemporaryStopCheckingMicrophone, getThresholdDecibelLevel, getDecibelLevel, setDecibelLevel, getMaxWaitTime, setMaxWaitTime, getMinWaitTime, setMinWaitTime, getMaxSessionTime, setMaxSessionTime, getMinSessionTime, setMinSessionTime, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, setCurrentSoundName, getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState, setWaitTimerActive, getSessionActive } from './constantsAndGlobalVars.js';
 import { updateCanvas } from './ui.js';
 
 let sessionTimer;
@@ -131,8 +131,11 @@ export function updateInputFieldValues() {
         setThresholdDecibelLevel(thresholddBValue);
     }
   }
-  
 
+function updateHighestdB() {
+    const currentdB = getDecibelLevel();
+    setHighestdBSuffered(currentdB);
+}
 
 
 export async function gameLoop() {
@@ -154,6 +157,7 @@ export async function gameLoop() {
                 startSession();
             }
           }
+          updateHighestdB();
           updateCanvas();
           updateInputFieldValues();
         }
@@ -371,8 +375,6 @@ export function setGameState(newState) {
             getElements().buttonRow.classList.remove('d-flex');
             getElements().canvasContainer.classList.remove('d-flex');
             getElements().canvasContainer.classList.add('d-none');
-            getElements().returnToMenuButton.classList.remove('d-flex');
-            getElements().returnToMenuButton.classList.add('d-none');
             getElements().button1.classList.add('d-none');
             getElements().button2.classList.add('d-none');
 
@@ -385,9 +387,6 @@ export function setGameState(newState) {
             getElements().buttonRow.classList.add('d-flex');
             getElements().canvasContainer.classList.remove('d-none');
             getElements().canvasContainer.classList.add('d-flex');
-            getElements().returnToMenuButton.classList.remove('d-none');
-            getElements().returnToMenuButton.classList.add('d-flex');
-            getElements().returnToMenuButton.innerHTML = `${localize('menuTitle', getLanguage())}`;
             getElements().button1.classList.add('d-none');
             getElements().button2.classList.add('d-none');
             break;
@@ -398,9 +397,6 @@ export function setGameState(newState) {
             getElements().buttonRow.classList.add('d-flex');
             getElements().canvasContainer.classList.remove('d-none');
             getElements().canvasContainer.classList.add('d-flex');
-            getElements().returnToMenuButton.classList.remove('d-none');
-            getElements().returnToMenuButton.classList.add('d-flex');
-            getElements().returnToMenuButton.innerHTML = `${localize('menuTitle', getLanguage())}`;
             getElements().button1.classList.remove('d-none');
             getElements().button2.classList.remove('d-none');
             break;

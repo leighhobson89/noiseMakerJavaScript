@@ -41,6 +41,7 @@ let minWaitTime = 60;
 let maxSessionTime = 6;
 let minSessionTime = 5;
 let thresholdDecibelLevelToStartYapping = 45;
+let highestdBSuffered = 0.0;
 
 //FLAGS
 let audioMuted = false;
@@ -61,7 +62,6 @@ export function setElements() {
         menu: document.getElementById('menu'),
         menuTitle: document.getElementById('menuTitle'),
         newGameMenuButton: document.getElementById('newGame'),
-        returnToMenuButton: document.getElementById('returnToMenu'),
         canvas: document.getElementById('canvas'),
         canvasContainer: document.getElementById('canvasContainer'),
         buttonRow: document.getElementById('buttonRow'),
@@ -327,3 +327,20 @@ export function setMicrophonePermissionGranted(value) {
 export function getMicrophonePermissionGranted() {
     return microphonePermissionGranted;
 }
+
+export function setHighestdBSuffered(value) {
+    // Ensure value is a number
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue)) {
+        console.error("Invalid value passed to setHighestdBSuffered:", value);
+        return;
+    }
+    // Update highest dB suffered
+    highestdBSuffered = Math.max(highestdBSuffered, parseFloat(numericValue.toFixed(1)));
+}
+
+
+export function getHighestdBSuffered() {
+    return highestdBSuffered;
+}
+

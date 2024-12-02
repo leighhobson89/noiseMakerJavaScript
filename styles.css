@@ -131,7 +131,7 @@ button.disabled {
 #buttonRow button {
     width: 200px;
     height: 50px;
-    margin: 0 10px;
+    margin: 5px 10px 0px;
     text-align: center;
     display: flex;
     align-items: center;

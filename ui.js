@@ -1,4 +1,4 @@
-import { getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel } from './constantsAndGlobalVars.js';
+import { getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel } from './constantsAndGlobalVars.js';
 import { stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
@@ -13,10 +13,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         setGameState(getGameVisiblePaused());
         startGame();
-    });
-
-    getElements().returnToMenuButton.addEventListener('click', () => {
-        setGameState(getMenuState());
     });
 
     getElements().button1.addEventListener('click', () => {
@@ -80,29 +76,18 @@ export function updateCanvas() {
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
         ctx.fillText(`Yapping Session Active...🤣🤣🤣`, 10, 30);
-        ctx.fillText(`I'm going to be Yapping for the next ${getRemainingTimeSession()} seconds`, 10, 60);
-
-        const currentSound = getCurrentSound();
-        if (currentSound) {
-            const currentSoundName = currentSound.sound;
-            if (currentSoundName) {
-                ctx.fillText(`Playing: ${currentSoundName}`, 10, 90);
-            }
+        if (getRemainingTimeSession() !== null) {
+            ctx.fillText(`I'm going to be Yapping for the next ${getRemainingTimeSession()} seconds`, 10, 60);
         }
-
-        const minSessionTime = getMinSessionTime();
-        const maxSessionTime = getMaxSessionTime();
-        ctx.fillText(`Min Session Time: ${minSessionTime} seconds`, 10, 120);
-        ctx.fillText(`Max Session Time: ${maxSessionTime} seconds`, 10, 150);
     } 
     // Display wait timer status
     else if (getWaitTimerActive()) {
         const remainingWaitTime = getRemainingTimeSession();
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
-        ctx.fillText(`Countdown To Next Yapping Session...🤣🤣`, 10, 30);
-        ctx.fillText(`Time left: ${remainingWaitTime} seconds`, 10, 60);
-        ctx.fillText(`Will Yap at: ${getThresholdDecibelLevel()}dB`, 10, 120);
+        ctx.fillText(`Countdown To Next Yapping Session...${remainingWaitTime} seconds🤣🤣`, 10, 30);
+        ctx.fillText(`Will Yap at: ${getThresholdDecibelLevel()}dB`, 10, 90);
+        ctx.fillText(`Highest dB suffered: ${getHighestdBSuffered()}dB`, 10, 120);
 
         const decibelLevel = getDecibelLevel();
         let noiseColor = 'white';  // Default color
