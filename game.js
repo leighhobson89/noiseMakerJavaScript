@@ -437,11 +437,11 @@ export function drawDecibelLineChart() {
 
     let averageColor;
     if (allTimeAverage < threshold / 2) {
-        averageColor = 'lime'; // Light green for low averages
+        averageColor = 'lime';
     } else if (allTimeAverage < threshold * 0.9) {
-        averageColor = 'orangered'; // Light orange for mid-range averages
+        averageColor = 'orangered';
     } else {
-        averageColor = 'red'; // Light red for high averages
+        averageColor = 'red';
     }
 
     ctx.strokeStyle = averageColor;
