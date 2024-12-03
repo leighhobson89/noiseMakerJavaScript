@@ -12,9 +12,12 @@ let oldLanguage = 'en';
 
 //CONSTANTS
 export let gameState;
-export const MENU_STATE = 'menuState';
-export const GAME_VISIBLE_PAUSED = 'gameVisiblePaused';
-export const GAME_VISIBLE_ACTIVE = 'gameVisibleActive';
+const MENU_STATE = 'menuState';
+const GAME_VISIBLE_PAUSED = 'gameVisiblePaused';
+const GAME_VISIBLE_ACTIVE = 'gameVisibleActive';
+const HAPPY_IMAGE_URL = "./resources/images/happy.png";
+const FRUSTRATED_IMAGE_URL = "./resources/images/frustrated.png";
+const ANGRY_IMAGE_URL = "./resources/images/angry.png";
 
 const samplesURLS = {
     samples: {
@@ -46,6 +49,7 @@ let dBValues = [];
 let averagedBs = [];
 let currentAveragedB = 0;
 let temperament = 0;
+let currentImage = null;
 
 let allTimeAverageData = {
     sum: 0,
@@ -90,7 +94,8 @@ export function setElements() {
         minSessionTimeField: document.getElementById('minSessionTimeField'),
         maxSessionTimeField: document.getElementById('maxSessionTimeField'),
         thresholddBLabel: document.querySelector('label[for="thresholddBField"]'),
-        thresholddB: document.getElementById('thresholddBField')
+        thresholddB: document.getElementById('thresholddBField'),
+        floatingMoodContainer: document.getElementById('floatingMoodContainer')
     };
 }
 
@@ -408,5 +413,25 @@ export function getAverageAlreadyBoosted() {
 
 export function setAverageAlreadyBoosted(value) {
     averageAlreadyBoosted = value;
+}
+
+export function setCurrentImage(value) {
+    currentImage = value;
+}
+
+export function getCurrentImage() {
+    return currentImage;
+}
+
+export function getHappyURL() {
+    return HAPPY_IMAGE_URL;
+}
+
+export function getFrustratedURL() {
+    return FRUSTRATED_IMAGE_URL;
+}
+
+export function getAngryURL() {
+    return ANGRY_IMAGE_URL;
 }
 

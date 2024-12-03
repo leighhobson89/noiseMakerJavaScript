@@ -1,7 +1,9 @@
 import {
-    localize
-} from './localization.js';
-import {
+    getHappyURL,
+    getFrustratedURL,
+    getAngryURL,
+    getCurrentImage,
+    setCurrentImage,
     setAverageAlreadyBoosted,
     getAverageAlreadyBoosted,
     getInitializingMic,
@@ -34,13 +36,8 @@ import {
     setMinSessionTime,
     setRemainingTimeSession,
     getRemainingTimeSession,
-    getCurrentSoundName,
-    setCurrentSoundName,
     getSampleURLS,
-    getSessionDuration,
     setSessionActive,
-    setSessionTimer,
-    setSessionDuration,
     getCurrentSound,
     setCurrentSound,
     setBeginGameStatus,
@@ -54,9 +51,7 @@ import {
     gameState,
     setWaitTimerActive,
     getSessionActive,
-    getWaitTimerActive,
-    getTemperament,
-    setTemperament
+    getTemperament
 } from './constantsAndGlobalVars.js';
 import {
     updateCanvas
@@ -206,12 +201,15 @@ export async function gameLoop() {
 
 
     if (gameState === getGameVisibleActive() || gameState === getGameVisiblePaused()) {
-        ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height); // Clear the canvas every frame
+        ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
 
         if (getInitializingMic()) {
             ctx.fillStyle = 'white';
             ctx.font = '20px Arial';
-            ctx.fillText(`Deciding whether to yap...not this time...🤣🤣`, 10, 30);
+            ctx.fillText(`Reinitializing Microphone...😕`, 10, 30);
+
+            getElements().yappingDogImg.classList.add('d-none');
+            getElements().floatingMoodContainer.classList.add('d-none');
         }
         
         if (gameState === getGameVisibleActive() && !getInitializingMic()) {
@@ -235,6 +233,7 @@ export async function gameLoop() {
                         setAllTimeAverageData(allTimeAverageData);
                         setAverageAlreadyBoosted(true);                    }           
                 }
+                updateMoodImage();
                 updateHighestdB();
 
                 averageGraphFrameCounter++;
@@ -265,10 +264,38 @@ export async function gameLoop() {
     }
 }
 
+function updateMoodImage() {
+    const moodContainer = document.getElementById('floatingMoodContainer');
+
+    let imageUrl;
+    switch (getTemperament()) {
+        case 0:
+            imageUrl = getHappyURL();
+            break;
+        case 1:
+            imageUrl = getFrustratedURL();
+            break;
+        case 2:
+            imageUrl = getAngryURL();
+            break;
+    }
+
+    setCurrentImage(imageUrl);
+    moodContainer.innerHTML = '';
+
+    const moodImage = document.createElement('img');
+    moodImage.src = imageUrl;
+    moodImage.alt = 'Mood Image';
+    moodImage.style.width = '100%';
+    moodImage.style.height = '100%';
+    moodImage.style.objectFit = 'cover';
+
+    moodContainer.appendChild(moodImage);
+}
+
 export function calculateMood() {
     const allTimeAverage = getAllTimeAverageData().average;
     const threshold = getThresholdDecibelLevel();
-    const highestdB = getHighestdBSuffered();
 
     let mood = "None.";
 
@@ -305,13 +332,17 @@ export function drawDecibelLineChart() {
     const canvasWidth = getElements().canvas.width;
     const canvasHeight = getElements().canvas.height;
 
-    const highestdB = getHighestdBSuffered();
-    const highestdBPosition = (canvasHeight) - (highestdB * (canvasHeight) / 100);
+    const threshold = getThresholdDecibelLevel();
+    const currentdB = getCurrentAveragedB();
 
-    const allTimeAverage = getAllTimeAverageData().average;
-    const allTimeAveragePosition = (canvasHeight) - (allTimeAverage * (canvasHeight) / 100);
+    if (currentdB < threshold / 2) {
+        ctx.strokeStyle = 'green';
+    } else if (currentdB < threshold * 0.9) {
+        ctx.strokeStyle = 'orange';
+    } else {
+        ctx.strokeStyle = 'red';
+    }
 
-    ctx.strokeStyle = 'blue';
     ctx.lineWidth = 2;
 
     ctx.beginPath();
@@ -329,7 +360,9 @@ export function drawDecibelLineChart() {
 
     ctx.stroke();
 
-    // Plot the red line for the highest dB value
+    const highestdB = getHighestdBSuffered();
+    const highestdBPosition = (canvasHeight) - (highestdB * (canvasHeight) / 100);
+
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 2;
 
@@ -338,7 +371,9 @@ export function drawDecibelLineChart() {
     ctx.lineTo(canvasWidth, highestdBPosition);
     ctx.stroke();
 
-    // Plot the yellow line for the all-time average value
+    const allTimeAverage = getAllTimeAverageData().average;
+    const allTimeAveragePosition = (canvasHeight) - (allTimeAverage * (canvasHeight) / 100);
+
     ctx.strokeStyle = 'yellow';
     ctx.lineWidth = 2;
 
@@ -350,6 +385,8 @@ export function drawDecibelLineChart() {
 
 export async function startSession() {
     getElements().yappingDogImg.classList.remove('d-none');
+    getElements().floatingMoodContainer.classList.add('d-none');
+
     sessionDuration = Math.floor(Math.random() * (getMaxSessionTime() - getMinSessionTime() + 1)) + getMinSessionTime();
 
     setSessionActive(true);
@@ -383,6 +420,8 @@ export async function stopSession(setupMic) {
     if (!getElements().yappingDogImg.classList.contains('d-none')) {
         getElements().yappingDogImg.classList.add('d-none');
     }
+
+    getElements().floatingMoodContainer.classList.remove('d-none');
 
     startWaitTimer();
     setTemporaryStopCheckingMicrophone(false);

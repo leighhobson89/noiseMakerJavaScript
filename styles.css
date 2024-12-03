@@ -198,3 +198,13 @@ canvas {
 .side-bars-elements {
     font-size: 0.8rem;
 }
+
+#floatingMoodContainer {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    top: 85px;
+    right: 120px;
+    z-index: 1000;
+    background-color: transparent
+}
