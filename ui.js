@@ -1,4 +1,4 @@
-import { setNoiseType, getNoiseType, getButtonClickYap, setTemperament, getTemperament, getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, setSessionActive, getAllTimeAverageData } from './constantsAndGlobalVars.js';
+import { getReactionCounter, setNoiseType, getNoiseType, getButtonClickYap, setTemperament, getTemperament, getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, setSessionActive, getAllTimeAverageData, setReactionCounter } from './constantsAndGlobalVars.js';
 import { calculateMood, drawDecibelLineChart, stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     getElements().button1.addEventListener('click', () => {
         stopAllTimers();
         if (!getSessionActive()) {
-            startSession(true);
+            startSession(true, false);
             setWaitTimerActive(false);
         }
         getElements().yappingDogImg.classList.remove('d-none');
@@ -111,7 +111,9 @@ export function updateCanvas() {
         const remainingWaitTime = getRemainingTimeSession();
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
-        ctx.fillText(`Yapping Decision...${remainingWaitTime} s`, 10, 30);
+
+        ctx.fillText(`Total Yapping Sessions: ${getReactionCounter()}`, 10, 30);
+        ctx.fillText(`Yapping Decision...${remainingWaitTime} s`, 10, 60);
 
         const highestdB = getHighestdBSuffered();
         const threshold = getThresholdDecibelLevel();
@@ -148,7 +150,7 @@ export function updateCanvas() {
             ctx.fillStyle = 'red';
         }
 
-        ctx.fillText(`Desire to Yap: ${mood}`, 10, 60);
+        ctx.fillText(`Desire to Yap: ${mood}`, 10, 90);
 
         drawDecibelLineChart();
     }    

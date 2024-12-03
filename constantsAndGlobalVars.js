@@ -85,6 +85,7 @@ let temperament = 0;
 let currentImage = null;
 let trendingMood = 'improving';
 let noiseType = null;
+let reactionCounter = 0;
 
 let allTimeAverageData = {
     sum: 0,
@@ -507,6 +508,14 @@ export function setNoiseType(value) {
 
 export function getNoiseType() {
     return noiseType;
+}
+
+export function setReactionCounter(value) {
+    reactionCounter = value;
+}
+
+export function getReactionCounter() {
+    return reactionCounter;
 }
 
 

@@ -1,4 +1,6 @@
 import {
+    setReactionCounter,
+    getReactionCounter,
     getNoiseType,
     setNoiseType,
     setButtonClickYap,
@@ -229,7 +231,7 @@ export async function gameLoop() {
                     clearInterval(waitTimer);
                     setWaitTimerActive(false);
                     stopMicrophone();
-                    startSession(false);
+                    startSession(false, true);
                 } else if (getDecibelLevel() > getThresholdDecibelLevel()) {
                     if (!getAverageAlreadyBoosted()) {
                         const allTimeAverageData = getAllTimeAverageData();
@@ -477,7 +479,11 @@ export function drawDecibelLineChart() {
 }
 
 
-export async function startSession(buttonClickYap) {
+export async function startSession(buttonClickYap, countYapTrueNotFalse) {
+    if (countYapTrueNotFalse) {
+        setReactionCounter(getReactionCounter() + 1);
+    }
+
     if (buttonClickYap) {
         setButtonClickYap(true);
     }
@@ -535,7 +541,7 @@ export async function startWaitTimer() {
             setWaitTimerActive(false);
             stopMicrophone();
             if (getTemperament() === 2) {
-                startSession(false);
+                startSession(false, true);
             } else if (getTemperament() === 1) {
                 const allTimeAverage = getAllTimeAverageData().average;
                 const threshold = getThresholdDecibelLevel();
@@ -544,7 +550,7 @@ export async function startWaitTimer() {
 
                 if (randomChance <= percentage) {
                     console.log("Will Yap");
-                    startSession(false);
+                    startSession(false, true);
                 } else {
                     console.log("No Yapping. Condition not met. Random chance:", randomChance.toFixed(2), ">");
                     stopSession(true);
