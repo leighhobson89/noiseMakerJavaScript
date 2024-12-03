@@ -42,6 +42,16 @@ let maxSessionTime = 6;
 let minSessionTime = 5;
 let thresholdDecibelLevelToStartYapping = 60;
 let highestdBSuffered = 0.0;
+let dBValues = [];
+let averagedBs = [];
+let currentAveragedB = 0;
+let temperament = 0;
+
+let allTimeAverageData = {
+    sum: 0,
+    count: 0,
+    average: 0
+};
 
 //FLAGS
 let audioMuted = false;
@@ -52,6 +62,8 @@ let temporaryStopCheckingMicrophone = false;
 let waitTimerActive = false;
 let sessionActive = false;
 let microphonePermissionGranted = false;
+let initializingMic = false;
+let averageAlreadyBoosted = false;
 
 let autoSaveOn = false;
 export let pauseAutoSaveCountdown = true;
@@ -69,7 +81,6 @@ export function setElements() {
         button1: document.getElementById('button1'),
         button2: document.getElementById('button2'),
         yappingDogImg: document.getElementById('yappingDogImg'),
-        waitingDogImg: document.getElementById('waitingDogImg'),
         minWaitTimeLabel: document.querySelector('label[for="minWaitTimeField"]'),
         maxWaitTimeLabel: document.querySelector('label[for="maxWaitTimeField"]'),
         minSessionTimeLabel: document.querySelector('label[for="minSessionTimeField"]'),
@@ -339,8 +350,63 @@ export function setHighestdBSuffered(value) {
     highestdBSuffered = Math.max(highestdBSuffered, parseFloat(numericValue.toFixed(1)));
 }
 
-
 export function getHighestdBSuffered() {
     return highestdBSuffered;
+}
+
+export function getDBValues() {
+    return dBValues;
+}
+
+export function setDBValues(value) {
+    dBValues = value; 
+}
+
+export function getAveragedBs() {
+    return averagedBs;
+}
+
+export function setAveragedBs(value) {
+    averagedBs = value;
+}
+
+export function getCurrentAveragedB() {
+    return currentAveragedB;
+}
+
+export function setCurrentAveragedB(value) {
+    currentAveragedB = value;
+}
+
+export function getAllTimeAverageData() {
+    return allTimeAverageData;
+}
+
+export function setAllTimeAverageData(value) {
+    allTimeAverageData = value;
+}
+
+export function getTemperament() {
+    return temperament;
+}
+
+export function setTemperament(value) {
+    temperament = value;
+}
+
+export function getInitializingMic() {
+    return initializingMic;
+}
+
+export function setInitializingMic(value) {
+    initializingMic = value;
+}
+
+export function getAverageAlreadyBoosted() {
+    return averageAlreadyBoosted;
+}
+
+export function setAverageAlreadyBoosted(value) {
+    averageAlreadyBoosted = value;
 }
 

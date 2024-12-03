@@ -1,5 +1,5 @@
-import { getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel } from './constantsAndGlobalVars.js';
-import { stopAllTimers, setGameState, startGame } from './game.js';
+import { setTemperament, getTemperament, getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, setSessionActive, getAllTimeAverageData } from './constantsAndGlobalVars.js';
+import { calculateMood, drawDecibelLineChart, stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
 
@@ -22,12 +22,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             setWaitTimerActive(false);
         }
         getElements().yappingDogImg.classList.remove('d-none');
-        getElements().waitingDogImg.classList.add('d-none');
     });
 
     getElements().button2.addEventListener('click', () => {
         getElements().yappingDogImg.classList.add('d-none');
-        getElements().waitingDogImg.classList.add('d-none');
+
          stopAllTimers();
          setWaitTimerActive(false);
     });
@@ -67,11 +66,9 @@ export function disableActivateButton(button, action, activeClass) {
 
 export function updateCanvas() {
     const ctx = getElements().canvas.getContext('2d');
-
-    // Start by clearing the canvas
+    
     ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
 
-    // Display session status
     if (getSessionActive()) {
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
@@ -79,48 +76,62 @@ export function updateCanvas() {
         if (getRemainingTimeSession() !== null) {
             ctx.fillText(`Yapping for the next ${getRemainingTimeSession()} seconds`, 10, 60);
         }
-    } 
-    // Display wait timer status
-    else if (getWaitTimerActive()) {
+    } else if (getWaitTimerActive()) {
         const remainingWaitTime = getRemainingTimeSession();
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
         ctx.fillText(`Next Yapping Session...${remainingWaitTime} seconds🤣🤣`, 10, 30);
         ctx.fillText(`Will Yap at: ${getThresholdDecibelLevel()}dB`, 10, 90);
 
-        // Determine color for the highest dB suffered
         const highestdB = getHighestdBSuffered();
         const threshold = getThresholdDecibelLevel();
-        let highestdBColor = 'white'; // Default color
+        let highestdBColor = 'white';
 
         if (highestdB < threshold / 2) {
-            highestdBColor = 'green'; // Green if less than half of the threshold
+            highestdBColor = 'green';
         } else if (highestdB < threshold * 0.9) {
-            highestdBColor = 'orange'; // Orange if less than 90% of the threshold
+            highestdBColor = 'orange';
         } else {
-            highestdBColor = 'red'; // Red if greater than or equal to 90%
+            highestdBColor = 'red';
         }
 
-        // Render "Highest dB suffered" text
         ctx.fillStyle = highestdBColor;
         ctx.fillText(`Highest dB suffered: ${highestdB}dB`, 10, 120);
 
-        // Determine color for current noise level
+        ctx.fillStyle = 'yellow';
+        ctx.fillText(`Average dB: ${getAllTimeAverageData().average}dB`, 10, 150);
+
         const decibelLevel = getDecibelLevel();
-        let noiseColor = 'white'; // Default color
+        let noiseColor = 'white';
 
         if (decibelLevel < threshold / 2) {
-            noiseColor = 'green'; // Green if less than half of the threshold
+            noiseColor = 'green';
         } else if (decibelLevel < threshold * 0.9) {
-            noiseColor = 'orange'; // Orange if less than 90% of the threshold
+            noiseColor = 'orange';
         } else {
-            noiseColor = 'red'; // Red if greater than or equal to 90%
+            noiseColor = 'red';
         }
 
-        // Render "Current Noise Level" text
         ctx.fillStyle = noiseColor;
-        ctx.fillText(`Current Noise Level: ${Math.round(decibelLevel)} dB`, 10, 150);
-    }
+        ctx.fillText(`Current Noise Level: ${Math.round(decibelLevel)} dB`, 10, 180);
+
+        const mood = calculateMood();
+
+        if (mood === "None.") {
+            setTemperament(0);
+            ctx.fillStyle = 'green';
+        } else if (mood === "So-so, certainly possible!") {
+            setTemperament(1);
+            ctx.fillStyle = 'orange';
+        } else if (mood === "On the verge!") {
+            setTemperament(2);
+            ctx.fillStyle = 'red';
+        }
+
+        ctx.fillText(`Desire to Yap: ${mood}`, 10, 240);
+
+        drawDecibelLineChart();
+    }    
 }
 
 

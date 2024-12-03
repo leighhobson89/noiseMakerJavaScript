@@ -1,11 +1,74 @@
-import { localize } from './localization.js';
-import { setHighestdBSuffered, getHighestdBSuffered, setThresholdDecibelLevel, setMicrophonePermissionGranted, getMicrophonePermissionGranted, setTemporaryStopCheckingMicrophone, getTemporaryStopCheckingMicrophone, getThresholdDecibelLevel, getDecibelLevel, setDecibelLevel, getMaxWaitTime, setMaxWaitTime, getMinWaitTime, setMinWaitTime, getMaxSessionTime, setMaxSessionTime, getMinSessionTime, setMinSessionTime, setRemainingTimeSession, getRemainingTimeSession, getCurrentSoundName, setCurrentSoundName, getSampleURLS, getSessionDuration, setSessionActive, setSessionTimer, setSessionDuration, getCurrentSound, setCurrentSound, setBeginGameStatus, setGameStateVariable, getBeginGameStatus, getMenuState, getGameVisiblePaused, getGameVisibleActive, getElements, getLanguage, gameState, setWaitTimerActive, getSessionActive } from './constantsAndGlobalVars.js';
-import { updateCanvas } from './ui.js';
+import {
+    localize
+} from './localization.js';
+import {
+    setAverageAlreadyBoosted,
+    getAverageAlreadyBoosted,
+    getInitializingMic,
+    setInitializingMic,
+    getAllTimeAverageData,
+    setAllTimeAverageData,
+    setCurrentAveragedB,
+    getCurrentAveragedB,
+    getAveragedBs,
+    setAveragedBs,
+    getDBValues,
+    setDBValues,
+    setHighestdBSuffered,
+    getHighestdBSuffered,
+    setThresholdDecibelLevel,
+    setMicrophonePermissionGranted,
+    getMicrophonePermissionGranted,
+    setTemporaryStopCheckingMicrophone,
+    getTemporaryStopCheckingMicrophone,
+    getThresholdDecibelLevel,
+    getDecibelLevel,
+    setDecibelLevel,
+    getMaxWaitTime,
+    setMaxWaitTime,
+    getMinWaitTime,
+    setMinWaitTime,
+    getMaxSessionTime,
+    setMaxSessionTime,
+    getMinSessionTime,
+    setMinSessionTime,
+    setRemainingTimeSession,
+    getRemainingTimeSession,
+    getCurrentSoundName,
+    setCurrentSoundName,
+    getSampleURLS,
+    getSessionDuration,
+    setSessionActive,
+    setSessionTimer,
+    setSessionDuration,
+    getCurrentSound,
+    setCurrentSound,
+    setBeginGameStatus,
+    setGameStateVariable,
+    getBeginGameStatus,
+    getMenuState,
+    getGameVisiblePaused,
+    getGameVisibleActive,
+    getElements,
+    getLanguage,
+    gameState,
+    setWaitTimerActive,
+    getSessionActive,
+    getWaitTimerActive,
+    getTemperament,
+    setTemperament
+} from './constantsAndGlobalVars.js';
+import {
+    updateCanvas
+} from './ui.js';
 
 let sessionTimer;
 let waitTimer;
 let sessionStartTime;
 let sessionDuration;
+
+let averageGraphFrameCounter = 0;
+let averageGraphUpdateFramesFrequency = 10;
 
 export async function startGame() {
     const ctx = getElements().canvas.getContext('2d');
@@ -20,7 +83,7 @@ export async function startGame() {
 
         getElements().canvas.width = canvasWidth;
         getElements().canvas.height = canvasHeight;
-        
+
         ctx.scale(1, 1);
     }
 
@@ -39,24 +102,24 @@ export async function startGame() {
 
 function initialiseSideBarElements() {
 
-  getElements().minWaitTimeField.value = getMinWaitTime();
-  getElements().maxWaitTimeField.value = getMaxWaitTime();
-  getElements().minSessionTimeField.value = getMinSessionTime();
-  getElements().maxSessionTimeField.value = getMaxSessionTime();
-  getElements().thresholddB.value = getThresholdDecibelLevel();
+    getElements().minWaitTimeField.value = getMinWaitTime();
+    getElements().maxWaitTimeField.value = getMaxWaitTime();
+    getElements().minSessionTimeField.value = getMinSessionTime();
+    getElements().maxSessionTimeField.value = getMaxSessionTime();
+    getElements().thresholddB.value = getThresholdDecibelLevel();
 
-  getElements().minWaitTimeLabel.classList.remove('d-none');
-  getElements().maxWaitTimeLabel.classList.remove('d-none');
-  getElements().minSessionTimeLabel.classList.remove('d-none');
-  getElements().maxSessionTimeLabel.classList.remove('d-none');
-  
-  getElements().minWaitTimeField.classList.remove('d-none');
-  getElements().maxWaitTimeField.classList.remove('d-none');
-  getElements().minSessionTimeField.classList.remove('d-none');
-  getElements().maxSessionTimeField.classList.remove('d-none');
+    getElements().minWaitTimeLabel.classList.remove('d-none');
+    getElements().maxWaitTimeLabel.classList.remove('d-none');
+    getElements().minSessionTimeLabel.classList.remove('d-none');
+    getElements().maxSessionTimeLabel.classList.remove('d-none');
 
-  getElements().thresholddBLabel.classList.remove('d-none');
-  getElements().thresholddB.classList.remove('d-none');
+    getElements().minWaitTimeField.classList.remove('d-none');
+    getElements().maxWaitTimeField.classList.remove('d-none');
+    getElements().minSessionTimeField.classList.remove('d-none');
+    getElements().maxSessionTimeField.classList.remove('d-none');
+
+    getElements().thresholddBLabel.classList.remove('d-none');
+    getElements().thresholddB.classList.remove('d-none');
 
 }
 
@@ -66,19 +129,19 @@ export function updateInputFieldValues() {
     const minSessionTimeField = getElements().minSessionTimeField;
     const maxSessionTimeField = getElements().maxSessionTimeField;
     const thresholddBField = getElements().thresholddB;
-  
+
     const minWaitTimeValue = parseInt(minWaitTimeField.value);
     const maxWaitTimeValue = parseInt(maxWaitTimeField.value);
     const minSessionTimeValue = parseInt(minSessionTimeField.value);
     const maxSessionTimeValue = parseInt(maxSessionTimeField.value);
     const thresholddBValue = parseInt(thresholddBField.value);
-  
+
     // Check for valid min/max values and update accordingly
     let validMinWait = true;
     let validMaxWait = true;
     let validMinSession = true;
     let validMaxSession = true;
-  
+
     // Validate Wait Time values
     if (!isNaN(minWaitTimeValue) && minWaitTimeValue > maxWaitTimeValue) {
         minWaitTimeField.style.color = 'red';
@@ -86,14 +149,14 @@ export function updateInputFieldValues() {
     } else {
         minWaitTimeField.style.color = 'black';
     }
-  
+
     if (!isNaN(maxWaitTimeValue) && maxWaitTimeValue < minWaitTimeValue) {
         maxWaitTimeField.style.color = 'red';
         validMaxWait = false;
     } else {
         maxWaitTimeField.style.color = 'black';
     }
-  
+
     // Validate Session Time values
     if (!isNaN(minSessionTimeValue) && minSessionTimeValue > maxSessionTimeValue) {
         minSessionTimeField.style.color = 'red';
@@ -101,36 +164,36 @@ export function updateInputFieldValues() {
     } else {
         minSessionTimeField.style.color = 'black';
     }
-  
+
     if (!isNaN(maxSessionTimeValue) && maxSessionTimeValue < minSessionTimeValue) {
         maxSessionTimeField.style.color = 'red';
         validMaxSession = false;
     } else {
         maxSessionTimeField.style.color = 'black';
     }
-  
+
     // Update values only if valid
     if (validMinWait) {
         setMinWaitTime(minWaitTimeValue);
     }
-  
+
     if (validMaxWait) {
         setMaxWaitTime(maxWaitTimeValue);
     }
-  
+
     if (validMinSession) {
         setMinSessionTime(minSessionTimeValue);
     }
-  
+
     if (validMaxSession) {
         setMaxSessionTime(maxSessionTimeValue);
     }
-  
+
     // Update the threshold decibel level (no validation needed)
     if (!isNaN(thresholddBValue)) {
         setThresholdDecibelLevel(thresholddBValue);
     }
-  }
+}
 
 function updateHighestdB() {
     const currentdB = getDecibelLevel();
@@ -140,34 +203,152 @@ function updateHighestdB() {
 
 export async function gameLoop() {
     const ctx = getElements().canvas.getContext('2d');
-    if (gameState === getGameVisibleActive() || gameState === getGameVisiblePaused()) {
-        ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
 
-        if (gameState === getGameVisibleActive()) {
-          if (!getSessionActive() && !getTemporaryStopCheckingMicrophone()) {
-            updateDecibelLevel();
-            if (getDecibelLevel() > getThresholdDecibelLevel()) {
-                console.log("Going To Yap because decibels are " + getDecibelLevel() + " which is higher than the threshold of " + getThresholdDecibelLevel());
-                setTemporaryStopCheckingMicrophone(true);
-                setRemainingTimeSession(0);
-                clearInterval(waitTimer);
-                setWaitTimerActive(false);
-                stopMicrophone();
-                
-                startSession();
+
+    if (gameState === getGameVisibleActive() || gameState === getGameVisiblePaused()) {
+        ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height); // Clear the canvas every frame
+
+        if (getInitializingMic()) {
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Deciding whether to yap...not this time...🤣🤣`, 10, 30);
+        }
+        
+        if (gameState === getGameVisibleActive() && !getInitializingMic()) {
+            if (!getSessionActive() && !getTemporaryStopCheckingMicrophone()) {
+                updateDecibelLevel();
+                if (getDecibelLevel() > getThresholdDecibelLevel() && getTemperament() === 2) {
+                    setTemporaryStopCheckingMicrophone(true);
+                    setRemainingTimeSession(0);
+                    clearInterval(waitTimer);
+                    setWaitTimerActive(false);
+                    stopMicrophone();
+                    startSession();
+                } else if (getDecibelLevel() > getThresholdDecibelLevel()) {
+                    if (!getAverageAlreadyBoosted()) {
+                        const allTimeAverageData = getAllTimeAverageData();
+                        const newAverage = parseFloat((allTimeAverageData.average * 1.2).toFixed(1));
+                        
+                        allTimeAverageData.sum = newAverage * allTimeAverageData.count;
+                        allTimeAverageData.average = newAverage;
+                        
+                        setAllTimeAverageData(allTimeAverageData);
+                        setAverageAlreadyBoosted(true);                    }           
+                }
+                updateHighestdB();
+
+                averageGraphFrameCounter++;
+
+                if (averageGraphFrameCounter >= averageGraphUpdateFramesFrequency) {
+                    const averagedDB = getCurrentAveragedB();
+                    const averagedBs = getAveragedBs();
+                    averagedBs.push(averagedDB);
+                    setAveragedBs(averagedBs);
+    
+                    averageGraphFrameCounter = 0;
+    
+                    if (getAveragedBs().length > 30) {
+                        const tempAveragedB = getAveragedBs();
+                        tempAveragedB.shift();
+                        setAveragedBs(tempAveragedB);
+                    }
+    
+                    updateAllTimeAverage(getCurrentAveragedB());
+                    setAverageAlreadyBoosted(false);
+                }
             }
-          }
-          updateHighestdB();
-          updateCanvas();
-          updateInputFieldValues();
+            updateCanvas();
+            updateInputFieldValues();
         }
 
         requestAnimationFrame(gameLoop);
     }
 }
 
+export function calculateMood() {
+    const allTimeAverage = getAllTimeAverageData().average;
+    const threshold = getThresholdDecibelLevel();
+    const highestdB = getHighestdBSuffered();
+
+    let mood = "None.";
+
+    if (allTimeAverage < (threshold * 0.5)) {
+        mood = "None.";
+    } else if (allTimeAverage < (threshold * 0.9)) {
+        mood = "So-so, certainly possible!";
+    } else {
+        mood = "On the verge!";
+    }
+
+    return mood;
+}
+
+
+export function updateAllTimeAverage(newValue) {
+    let allTimeAverageData = getAllTimeAverageData();
+
+    allTimeAverageData.sum += newValue;
+    allTimeAverageData.count += 1;
+
+    if (allTimeAverageData.count > 0) {
+        allTimeAverageData.average = parseFloat((allTimeAverageData.sum / allTimeAverageData.count).toFixed(1));
+    }
+
+    console.log(allTimeAverageData.average);
+
+    setAllTimeAverageData(allTimeAverageData);
+}
+
+export function drawDecibelLineChart() {
+    const ctx = getElements().canvas.getContext('2d');
+    const averagedBs = getAveragedBs();
+    const canvasWidth = getElements().canvas.width;
+    const canvasHeight = getElements().canvas.height;
+
+    const highestdB = getHighestdBSuffered();
+    const highestdBPosition = (canvasHeight) - (highestdB * (canvasHeight) / 100);
+
+    const allTimeAverage = getAllTimeAverageData().average;
+    const allTimeAveragePosition = (canvasHeight) - (allTimeAverage * (canvasHeight) / 100);
+
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    const spacing = canvasWidth / averagedBs.length;
+
+    averagedBs.forEach((value, index) => {
+        const x = index * spacing;
+        const y = (canvasHeight) - (value * (canvasHeight) / 100);
+        if (index === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    });
+
+    ctx.stroke();
+
+    // Plot the red line for the highest dB value
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(0, highestdBPosition);
+    ctx.lineTo(canvasWidth, highestdBPosition);
+    ctx.stroke();
+
+    // Plot the yellow line for the all-time average value
+    ctx.strokeStyle = 'yellow';
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(0, allTimeAveragePosition);
+    ctx.lineTo(canvasWidth, allTimeAveragePosition);
+    ctx.stroke();
+}
+
 export async function startSession() {
-    getElements().waitingDogImg.classList.add('d-none');
     getElements().yappingDogImg.classList.remove('d-none');
     sessionDuration = Math.floor(Math.random() * (getMaxSessionTime() - getMinSessionTime() + 1)) + getMinSessionTime();
 
@@ -182,74 +363,98 @@ export async function startSession() {
         if (getRemainingTimeSession() <= 0) {
             clearInterval(sessionTimer);
             await initializeMicrophoneListener();
-            stopSession();
+            stopSession(false);
         } else {
             playRandomSound();
         }
     }, 1000);
 }
 
+export async function stopSession(setupMic) {
 
-export async function stopSession() {
-  clearInterval(sessionTimer);
-  setSessionActive(false);
-  stopAllSounds();
+    if (setupMic) {
+        await initializeMicrophoneListener();
+    }
 
-  getElements().yappingDogImg.classList.add('d-none');
-  getElements().waitingDogImg.classList.remove('d-none');
+    clearInterval(sessionTimer);
+    setSessionActive(false);
+    stopAllSounds();
 
-  startWaitTimer();
-  setTemporaryStopCheckingMicrophone(false);
+    if (!getElements().yappingDogImg.classList.contains('d-none')) {
+        getElements().yappingDogImg.classList.add('d-none');
+    }
+
+    startWaitTimer();
+    setTemporaryStopCheckingMicrophone(false);
 }
 
-export function startWaitTimer() {
-  let remainingWaitTime = Math.floor(Math.random() * (getMaxWaitTime() - getMinWaitTime() + 1)) + getMinWaitTime();
-  setWaitTimerActive(true);
+export async function startWaitTimer() {
+    let remainingWaitTime = Math.floor(Math.random() * (getMaxWaitTime() - getMinWaitTime() + 1)) + getMinWaitTime();
+    setWaitTimerActive(true);
 
-  waitTimer = setInterval(() => {
-      remainingWaitTime--;
-      setRemainingTimeSession(remainingWaitTime);
-      console.log("waiting for " + getRemainingTimeSession());
-      if (remainingWaitTime <= 0) {
-          clearInterval(waitTimer);
-          setWaitTimerActive(false);
-          stopMicrophone();
-          startSession();
-      }
-  }, 1000);
+    waitTimer = setInterval(() => {
+        remainingWaitTime--;
+        setRemainingTimeSession(remainingWaitTime);
+        if (remainingWaitTime <= 0) {
+            clearInterval(waitTimer);
+            setWaitTimerActive(false);
+            stopMicrophone();
+            if (getTemperament() === 2) {
+                startSession();
+            } else if (getTemperament() === 1) {
+                const allTimeAverage = getAllTimeAverageData().average;
+                const threshold = getThresholdDecibelLevel();
+                const percentage = (allTimeAverage / threshold) * 100;
+                const randomChance = Math.random() * 100;
+
+                if (randomChance <= percentage) {
+                    console.log("Will Yap");
+                    startSession();
+                } else {
+                    console.log("No Yapping. Condition not met. Random chance:", randomChance.toFixed(2), ">");
+                    stopSession(true);
+                }
+            } else {
+                stopSession(true);
+            }
+        }
+    }, 1000);
 }
 
 function playRandomSound() {
-  const sampleURLs = getSampleURLS();
-  const soundIds = Object.keys(sampleURLs.samples);
-  const randomId = soundIds[Math.floor(Math.random() * soundIds.length)];
-  const sound = sampleURLs.samples[randomId];
+    const sampleURLs = getSampleURLS();
+    const soundIds = Object.keys(sampleURLs.samples);
+    const randomId = soundIds[Math.floor(Math.random() * soundIds.length)];
+    const sound = sampleURLs.samples[randomId];
 
-  const audio = new Audio(sound.url);
-  setCurrentSound({ sound: sound.name, audio: audio });
-  audio.play();
+    const audio = new Audio(sound.url);
+    setCurrentSound({
+        sound: sound.name,
+        audio: audio
+    });
+    audio.play();
 }
 
 function stopAllSounds() {
-  const currentSound = getCurrentSound();
-  if (currentSound && currentSound.audio) {
-    currentSound.audio.pause();
-    currentSound.audio.currentTime = 0;
-  }
+    const currentSound = getCurrentSound();
+    if (currentSound && currentSound.audio) {
+        currentSound.audio.pause();
+        currentSound.audio.currentTime = 0;
+    }
 }
 
 export function stopSessionTimer() {
-  clearInterval(sessionTimer);
-  setSessionActive(false);
+    clearInterval(sessionTimer);
+    setSessionActive(false);
 }
 
 export function stopWaitTimer() {
-  clearInterval(waitTimer);
+    clearInterval(waitTimer);
 }
 
 export function stopAllTimers() {
-  stopSessionTimer();
-  stopWaitTimer();
+    stopSessionTimer();
+    stopWaitTimer();
 }
 
 //-------------------------------------MIC--------------------------------------------------
@@ -259,39 +464,37 @@ let dataArray;
 let micStream;
 
 async function checkMicrophonePermission() {
-    const platform = Capacitor.getPlatform();  // Get the current platform (web, android, ios)
+    const platform = Capacitor.getPlatform();
 
-    // Check if the browser supports mediaDevices.getUserMedia (for web platforms)
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
-            // Check platform type and handle permissions accordingly
             if (platform === 'web') {
                 console.log('Running on the web, skipping permission request');
-                // On web, directly attempt to access the microphone without requesting permission
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
                 if (stream) {
                     console.log('Microphone access granted on web');
                     setMicrophonePermissionGranted(true);
-                    stream.getTracks().forEach(track => track.stop());  // Stop the stream after access
+                    stream.getTracks().forEach(track => track.stop());
                 }
             } else {
                 console.log('Running on a native platform, attempting to access the microphone');
-                
-                // For Android and iOS, try to access the microphone directly via getUserMedia
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
 
                 if (stream) {
                     console.log('Microphone access granted on native platform');
                     setMicrophonePermissionGranted(true);
-                    stream.getTracks().forEach(track => track.stop());  // Stop the stream after access
+                    stream.getTracks().forEach(track => track.stop());
                 } else {
                     console.log('Microphone access denied on native platform');
                 }
             }
 
-            // Handle the case where permission was granted or denied
             if (getMicrophonePermissionGranted()) {
-                // Add any additional logic here, for example, starting a microphone recording, etc.
                 console.log('You can now use the microphone');
             } else {
                 console.log('Permission to access the microphone was denied');
@@ -299,7 +502,6 @@ async function checkMicrophonePermission() {
 
         } catch (err) {
             console.error('Error checking or requesting microphone permission:', err);
-            // Optionally log error message and name for more details
             console.error('Error name:', err.name);
             console.error('Error message:', err.message);
         }
@@ -310,21 +512,21 @@ async function checkMicrophonePermission() {
 
 
 async function initializeMicrophoneListener() {
-    // First, check if the permission is granted
+    setInitializingMic(true);
 
-    // If permission is granted, initialize the microphone listener
     if (getMicrophonePermissionGranted()) {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
             micStream = stream;
-            audioContext = new (window.AudioContext)();
+            audioContext = new(window.AudioContext)();
             const source = audioContext.createMediaStreamSource(stream);
             analyser = audioContext.createAnalyser();
             analyser.fftSize = 256;
             dataArray = new Uint8Array(analyser.frequencyBinCount);
             source.connect(analyser);
 
-            // Adding a 2.5-second timeout to allow the mic to normalize
             await new Promise(resolve => setTimeout(resolve, 2500));
 
             console.log('Microphone initialized');
@@ -334,8 +536,9 @@ async function initializeMicrophoneListener() {
     } else {
         console.error('Microphone permission not granted');
     }
-}
 
+    setInitializingMic(false);
+}
 
 function updateDecibelLevel() {
     if (analyser) {
@@ -345,7 +548,20 @@ function updateDecibelLevel() {
         for (let i = 0; i < dataArray.length; i++) {
             sum += dataArray[i];
         }
-        const decibelLevel = (sum / dataArray.length).toFixed(1);
+        const decibelLevel = parseFloat((sum / dataArray.length).toFixed(1));
+
+        let dBValues = getDBValues();
+        dBValues.push(decibelLevel);
+        setDBValues(dBValues);
+
+        if (dBValues.length === 10) {
+            const totalDB = dBValues.reduce((acc, val) => acc + parseFloat(val), 0);
+            const averageDB = parseFloat((totalDB / 10).toFixed(1));
+            setCurrentAveragedB(averageDB);
+
+            setDBValues([]);
+        }
+
         setDecibelLevel(decibelLevel);
     }
 }
@@ -372,7 +588,6 @@ function stopMicrophone() {
 
     console.log('Microphone and audio resources cleaned up');
 }
-
 
 //------------------------------------------------------------------------------------------
 
