@@ -347,12 +347,12 @@ export function calculateMood() {
     const allTimeAverage = getAllTimeAverageData().average;
     const threshold = getThresholdDecibelLevel();
 
-    let mood = "None.";
+    let mood = "None";
 
     if (allTimeAverage < (threshold * 0.5)) {
-        mood = "None.";
+        mood = "None";
     } else if (allTimeAverage < (threshold * 0.9)) {
-        mood = "So-so, certainly possible!";
+        mood = "Elevated";
     } else {
         mood = "On the verge!";
     }
@@ -384,29 +384,30 @@ export function drawDecibelLineChart() {
 
     const threshold = getThresholdDecibelLevel();
     const currentdB = getCurrentAveragedB();
+    let currentDbColor;
 
-    // Determine the stroke style based on the current decibel level
     if (currentdB < threshold / 2) {
         ctx.strokeStyle = 'green';
+        currentDbColor = 'green';
     } else if (currentdB < threshold * 0.9) {
         ctx.strokeStyle = 'orange';
+        currentDbColor = 'orange';
     } else {
         ctx.strokeStyle = 'red';
+        currentDbColor = 'red';
     }
 
     ctx.lineWidth = 2;
 
-    // Start the line path
     ctx.beginPath();
     const spacing = canvasWidth / averagedBs.length;
 
-    // Scale the decibel levels to fit the bottom half of the canvas
-    const maxGraphHeight = canvasHeight / 2; // Maximum height is half the canvas
-    const baseLine = canvasHeight; // 0 dB is at the bottom of the canvas
+    const maxGraphHeight = canvasHeight * 0.67;
+    const baseLine = canvasHeight;
 
     averagedBs.forEach((value, index) => {
         const x = index * spacing;
-        const y = baseLine - (value * maxGraphHeight / 100); // Scale value to fit in the bottom half
+        const y = baseLine - (value * maxGraphHeight / 100);
         if (index === 0) {
             ctx.moveTo(x, y);
         } else {
@@ -416,7 +417,6 @@ export function drawDecibelLineChart() {
 
     ctx.stroke();
 
-    // Draw the line for the highest dB suffered
     const highestdB = getHighestdBSuffered();
     const highestdBPosition = baseLine - (highestdB * maxGraphHeight / 100);
 
@@ -428,11 +428,19 @@ export function drawDecibelLineChart() {
     ctx.lineTo(canvasWidth, highestdBPosition);
     ctx.stroke();
 
-    // Draw the line for the all-time average
     const allTimeAverage = getAllTimeAverageData().average;
     const allTimeAveragePosition = baseLine - (allTimeAverage * maxGraphHeight / 100);
 
-    ctx.strokeStyle = 'yellow';
+    let averageColor;
+    if (allTimeAverage < threshold / 2) {
+        averageColor = 'lime'; // Light green for low averages
+    } else if (allTimeAverage < threshold * 0.9) {
+        averageColor = 'orangered'; // Light orange for mid-range averages
+    } else {
+        averageColor = 'red'; // Light red for high averages
+    }
+
+    ctx.strokeStyle = averageColor;
     ctx.lineWidth = 2;
 
     ctx.beginPath();
@@ -440,19 +448,29 @@ export function drawDecibelLineChart() {
     ctx.lineTo(canvasWidth, allTimeAveragePosition);
     ctx.stroke();
 
-    // Draw the threshold line
     const thresholdPosition = baseLine - (threshold * maxGraphHeight / 100);
 
     ctx.strokeStyle = 'blue';
     ctx.lineWidth = 1;
-    ctx.setLineDash([5, 5]); // Dotted line pattern
+    ctx.setLineDash([5, 5]);
     ctx.beginPath();
     ctx.moveTo(0, thresholdPosition);
     ctx.lineTo(canvasWidth, thresholdPosition);
     ctx.stroke();
-    ctx.setLineDash([]); // Reset line dash to solid
-}
+    ctx.setLineDash([]);
 
+    ctx.fillStyle = 'blue';
+    ctx.fillText(`Threshold: ${threshold}dB`, canvasWidth - 150, thresholdPosition - 5);
+
+    ctx.fillStyle = 'red';
+    ctx.fillText(`Highest: ${highestdB}dB`, canvasWidth - 150, highestdBPosition - 5);
+
+    ctx.fillStyle = averageColor;
+    ctx.fillText(`Ave: ${allTimeAverage}dB`, canvasWidth - 150, allTimeAveragePosition - 5);
+
+    ctx.fillStyle = currentDbColor;
+    ctx.fillText(`Current: ${Math.round(currentdB)}dB`, canvasWidth - 150, baseLine - (currentdB * maxGraphHeight / 100) - 5);
+}
 
 
 export async function startSession() {

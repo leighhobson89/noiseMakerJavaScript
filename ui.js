@@ -66,8 +66,9 @@ export function disableActivateButton(button, action, activeClass) {
 
 export function updateCanvas() {
     const ctx = getElements().canvas.getContext('2d');
-    
     ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
+
+    let currentnoiseColor;
 
     if (getSessionActive()) {
         ctx.fillStyle = 'white';
@@ -94,32 +95,22 @@ export function updateCanvas() {
             highestdBColor = 'red';
         }
 
-        ctx.fillStyle = highestdBColor;
-        ctx.fillText(`Highest dB suffered: ${highestdB}dB`, 10, 120);
-
-        ctx.fillStyle = 'yellow';
-        ctx.fillText(`Average dB: ${getAllTimeAverageData().average}dB`, 10, 150);
-
         const decibelLevel = getDecibelLevel();
-        let noiseColor = 'white';
 
         if (decibelLevel < threshold / 2) {
-            noiseColor = 'green';
+            currentnoiseColor = 'green';
         } else if (decibelLevel < threshold * 0.9) {
-            noiseColor = 'orange';
+            currentnoiseColor = 'orange';
         } else {
-            noiseColor = 'red';
+            currentnoiseColor = 'red';
         }
-
-        ctx.fillStyle = noiseColor;
-        ctx.fillText(`Current Noise Level: ${Math.round(decibelLevel)} dB`, 10, 180);
 
         const mood = calculateMood();
 
-        if (mood === "None.") {
+        if (mood === "None") {
             setTemperament(0);
             ctx.fillStyle = 'green';
-        } else if (mood === "So-so, certainly possible!") {
+        } else if (mood === "Elevated") {
             setTemperament(1);
             ctx.fillStyle = 'orange';
         } else if (mood === "On the verge!") {
@@ -127,10 +118,11 @@ export function updateCanvas() {
             ctx.fillStyle = 'red';
         }
 
-        ctx.fillText(`Desire to Yap: ${mood}`, 10, 240);
+        ctx.fillText(`Desire to Yap: ${mood}`, 10, 60);
 
         drawDecibelLineChart();
     }    
 }
+
 
 
