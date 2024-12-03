@@ -1,4 +1,6 @@
 import {
+    getNoiseType,
+    setNoiseType,
     setButtonClickYap,
     getButtonClickYap,
     getUpArrowURL,
@@ -555,10 +557,11 @@ export async function startWaitTimer() {
 }
 
 function playRandomSound() {
+    const noisetype = getNoiseType();
     const sampleURLs = getSampleURLS();
-    const soundIds = Object.keys(sampleURLs.samples);
+    const soundIds = Object.keys(sampleURLs.samples[noisetype]);
     const randomId = soundIds[Math.floor(Math.random() * soundIds.length)];
-    const sound = sampleURLs.samples[randomId];
+    const sound = sampleURLs.samples[noisetype][randomId];
 
     const audio = new Audio(sound.url);
     setCurrentSound({
@@ -740,16 +743,6 @@ export function setGameState(newState) {
             getElements().button2.classList.add('d-none');
 
             console.log("Language is " + getLanguage());
-            break;
-        case getGameVisiblePaused():
-            getElements().menu.classList.remove('d-flex');
-            getElements().menu.classList.add('d-none');
-            getElements().buttonRow.classList.remove('d-none');
-            getElements().buttonRow.classList.add('d-flex');
-            getElements().canvasContainer.classList.remove('d-none');
-            getElements().canvasContainer.classList.add('d-flex');
-            getElements().button1.classList.add('d-none');
-            getElements().button2.classList.add('d-none');
             break;
         case getGameVisibleActive():
             getElements().menu.classList.remove('d-flex');

@@ -1,6 +1,9 @@
 {
   "en": {
-    "newGame": "Have More Fun Than The Neighbour",
+    "yappyDog": "Yappy Dog",
+    "noiseType2": "NoiseType2",
+    "noiseType3": "NoiseType3",
+    "noiseType4": "NoiseType4",
     "clickAgainToStartNewGame": "Click again to start a New Game...",
     "loadGame": "Load Game",
     "saveGame": "Save Game",

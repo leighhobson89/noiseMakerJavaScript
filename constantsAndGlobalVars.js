@@ -23,15 +23,46 @@ const DOWN_ARROW_URL = "./resources/images/downArrow.png";
 
 const samplesURLS = {
     samples: {
-      1: { name: "dog1", url: "./resources/sounds/dog1.mp3" },
-      2: { name: "dog2", url: "./resources/sounds/dog2.mp3" },
-      3: { name: "dog3", url: "./resources/sounds/dog3.mp3" },
-      4: { name: "dog4", url: "./resources/sounds/dog4.mp3" },
-      5: { name: "dog5", url: "./resources/sounds/dog5.mp3" },
-      6: { name: "dog6", url: "./resources/sounds/dog6.mp3" },
-      7: { name: "dog7", url: "./resources/sounds/dog7.mp3" },
-      8: { name: "dog8", url: "./resources/sounds/dog8.mp3" },
-      9: { name: "dog9", url: "./resources/sounds/dog9.mp3" }
+      yappyDog: {
+        1: { name: "yappyDog1", url: "./resources/sounds/dog1.mp3" },
+        2: { name: "yappyDog2", url: "./resources/sounds/dog2.mp3" },
+        3: { name: "yappyDog3", url: "./resources/sounds/dog3.mp3" },
+        4: { name: "yappyDog4", url: "./resources/sounds/dog4.mp3" },
+        5: { name: "yappyDog5", url: "./resources/sounds/dog5.mp3" },
+        6: { name: "yappyDog6", url: "./resources/sounds/dog6.mp3" },
+        7: { name: "yappyDog7", url: "./resources/sounds/dog7.mp3" },
+        8: { name: "yappyDog8", url: "./resources/sounds/dog8.mp3" }
+      },
+      noiseType2: {
+        1: { name: "noiseType21", url: "./resources/sounds/dog1.mp3" },
+        2: { name: "noiseType22", url: "./resources/sounds/dog2.mp3" },
+        3: { name: "noiseType23", url: "./resources/sounds/dog3.mp3" },
+        4: { name: "noiseType24", url: "./resources/sounds/dog4.mp3" },
+        5: { name: "noiseType25", url: "./resources/sounds/dog5.mp3" },
+        6: { name: "noiseType26", url: "./resources/sounds/dog6.mp3" },
+        7: { name: "noiseType27", url: "./resources/sounds/dog7.mp3" },
+        8: { name: "noiseType28", url: "./resources/sounds/dog8.mp3" }
+      },
+      noiseType3: {
+        1: { name: "noiseType31", url: "./resources/sounds/dog1.mp3" },
+        2: { name: "noiseType32", url: "./resources/sounds/dog2.mp3" },
+        3: { name: "noiseType33", url: "./resources/sounds/dog3.mp3" },
+        4: { name: "noiseType34", url: "./resources/sounds/dog4.mp3" },
+        5: { name: "noiseType35", url: "./resources/sounds/dog5.mp3" },
+        6: { name: "noiseType36", url: "./resources/sounds/dog6.mp3" },
+        7: { name: "noiseType37", url: "./resources/sounds/dog7.mp3" },
+        8: { name: "noiseType38", url: "./resources/sounds/dog8.mp3" }
+      },
+      noiseType4: {
+        1: { name: "noiseType41", url: "./resources/sounds/dog1.mp3" },
+        2: { name: "noiseType42", url: "./resources/sounds/dog2.mp3" },
+        3: { name: "noiseType43", url: "./resources/sounds/dog3.mp3" },
+        4: { name: "noiseType44", url: "./resources/sounds/dog4.mp3" },
+        5: { name: "noiseType45", url: "./resources/sounds/dog5.mp3" },
+        6: { name: "noiseType46", url: "./resources/sounds/dog6.mp3" },
+        7: { name: "noiseType47", url: "./resources/sounds/dog7.mp3" },
+        8: { name: "noiseType48", url: "./resources/sounds/dog8.mp3" }
+      }
     }
   };
 
@@ -53,6 +84,7 @@ let currentAveragedB = 0;
 let temperament = 0;
 let currentImage = null;
 let trendingMood = 'improving';
+let noiseType = null;
 
 let allTimeAverageData = {
     sum: 0,
@@ -81,7 +113,10 @@ export function setElements() {
     elements = {
         menu: document.getElementById('menu'),
         menuTitle: document.getElementById('menuTitle'),
-        newGameMenuButton: document.getElementById('newGame'),
+        yappyDog: document.getElementById('yappyDog'),
+        noiseType2: document.getElementById('noiseType2'),
+        noiseType3: document.getElementById('noiseType3'),
+        noiseType4: document.getElementById('noiseType4'),
         canvas: document.getElementById('canvas'),
         canvasContainer: document.getElementById('canvasContainer'),
         buttonRow: document.getElementById('buttonRow'),
@@ -464,6 +499,14 @@ export function setButtonClickYap(value) {
 
 export function getButtonClickYap() {
     return buttonClickYap;
+}
+
+export function setNoiseType(value) {
+    noiseType = value;
+}
+
+export function getNoiseType() {
+    return noiseType;
 }
 
 

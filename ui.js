@@ -1,18 +1,29 @@
-import { getButtonClickYap, setTemperament, getTemperament, getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, setSessionActive, getAllTimeAverageData } from './constantsAndGlobalVars.js';
+import { setNoiseType, getNoiseType, getButtonClickYap, setTemperament, getTemperament, getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, setSessionActive, getAllTimeAverageData } from './constantsAndGlobalVars.js';
 import { calculateMood, drawDecibelLineChart, stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-
     setElements();
-    getElements().newGameMenuButton.addEventListener('click', async () => {
-        setBeginGameStatus(true);
-        if (!getGameInProgress()) {
-            setGameInProgress(true);
-        }
-        setGameState(getGameVisiblePaused());
-        startGame();
+
+    getElements().yappyDog.addEventListener('click', async () => {
+        setNoiseType("yappyDog");
+        initialiseGameFromMenuButtons();
+    });
+
+    getElements().noiseType2.addEventListener('click', async () => {
+        setNoiseType("noiseType2");
+        initialiseGameFromMenuButtons();
+    });
+
+    getElements().noiseType3.addEventListener('click', async () => {
+        setNoiseType("noiseType3");
+        initialiseGameFromMenuButtons();
+    });
+
+    getElements().noiseType4.addEventListener('click', async () => {
+        setNoiseType("noiseType4");
+        initialiseGameFromMenuButtons();
     });
 
     getElements().button1.addEventListener('click', () => {
@@ -35,9 +46,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     handleLanguageChange(getLanguageSelected());
 });
 
+function initialiseGameFromMenuButtons() {
+    setBeginGameStatus(true);
+    if (!getGameInProgress()) {
+        setGameInProgress(true);
+    }
+    setGameState(getGameVisibleActive());
+    startGame();
+}
+
 async function setElementsLanguageText() {
     getElements().menuTitle.innerHTML = `<h2>${localize('menuTitle', getLanguage())}</h2>`;
-    getElements().newGameMenuButton.innerHTML = `${localize('newGame', getLanguage())}`;
+    getElements().yappyDog.innerHTML = `${localize('yappyDog', getLanguage())}`;
+    getElements().noiseType2.innerHTML = `${localize('noiseType2', getLanguage())}`;
+    getElements().noiseType3.innerHTML = `${localize('noiseType3', getLanguage())}`;
+    getElements().noiseType4.innerHTML = `${localize('noiseType4', getLanguage())}`;
 }
 
 export async function handleLanguageChange(languageCode) {
