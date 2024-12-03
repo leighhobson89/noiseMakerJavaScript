@@ -200,11 +200,32 @@ canvas {
 }
 
 #floatingMoodContainer {
-    width: 100px;
-    height: 100px;
     position: absolute;
     top: 85px;
     right: 120px;
+    width: 150px;
+    height: 100px;
+    display: flex;
+    flex-direction: row;
+    pointer-events: none;
     z-index: 1000;
-    background-color: transparent
 }
+
+#floatingMoodContainerLeft {
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+    height: 100%;
+}
+
+#floatingMoodContainerLeftUp,
+#floatingMoodContainerLeftDown {
+    flex: 1;
+    width: 100%;
+}
+
+#floatingMoodContainerRight {
+    width: 80%;
+    height: 100%;
+}
+

@@ -1,4 +1,8 @@
 import {
+    getUpArrowURL,
+    getDownArrowURL,
+    setTrendingMood,
+    getTrendingMood,
     getHappyURL,
     getFrustratedURL,
     getAngryURL,
@@ -215,7 +219,7 @@ export async function gameLoop() {
         if (gameState === getGameVisibleActive() && !getInitializingMic()) {
             if (!getSessionActive() && !getTemporaryStopCheckingMicrophone()) {
                 updateDecibelLevel();
-                if (getDecibelLevel() > getThresholdDecibelLevel() && getTemperament() === 2) {
+                if ((getDecibelLevel() > getThresholdDecibelLevel() && getTemperament() === 2) || (getDecibelLevel() > getThresholdDecibelLevel() * 3)) {
                     setTemporaryStopCheckingMicrophone(true);
                     setRemainingTimeSession(0);
                     clearInterval(waitTimer);
@@ -229,19 +233,28 @@ export async function gameLoop() {
                         
                         allTimeAverageData.sum = newAverage * allTimeAverageData.count;
                         allTimeAverageData.average = newAverage;
+
                         
                         setAllTimeAverageData(allTimeAverageData);
                         setAverageAlreadyBoosted(true);                    }           
                 }
-                updateMoodImage();
                 updateHighestdB();
 
                 averageGraphFrameCounter++;
 
                 if (averageGraphFrameCounter >= averageGraphUpdateFramesFrequency) {
-                    const averagedDB = getCurrentAveragedB();
+                    const averagedB = getCurrentAveragedB();
+
+                    if (getAllTimeAverageData().average > averagedB) {
+                        setTrendingMood('improving');
+                    } else {
+                        setTrendingMood('worsening');
+                    }
+
+                    updateMoodImage();
+
                     const averagedBs = getAveragedBs();
-                    averagedBs.push(averagedDB);
+                    averagedBs.push(averagedB);
                     setAveragedBs(averagedBs);
     
                     averageGraphFrameCounter = 0;
@@ -265,9 +278,13 @@ export async function gameLoop() {
 }
 
 function updateMoodImage() {
-    const moodContainer = document.getElementById('floatingMoodContainer');
+    const moodImageContainer = getElements().floatingMoodContainerRight;
+    const upArrowSection = getElements().floatingMoodContainerLeftUp;
+    const downArrowSection = getElements().floatingMoodContainerLeftDown;
 
     let imageUrl;
+    let imageUrlTrending;
+
     switch (getTemperament()) {
         case 0:
             imageUrl = getHappyURL();
@@ -281,7 +298,7 @@ function updateMoodImage() {
     }
 
     setCurrentImage(imageUrl);
-    moodContainer.innerHTML = '';
+    moodImageContainer.innerHTML = '';
 
     const moodImage = document.createElement('img');
     moodImage.src = imageUrl;
@@ -290,8 +307,41 @@ function updateMoodImage() {
     moodImage.style.height = '100%';
     moodImage.style.objectFit = 'cover';
 
-    moodContainer.appendChild(moodImage);
+    moodImageContainer.appendChild(moodImage);
+
+    const trendingMood = getTrendingMood();
+
+    if (trendingMood === 'improving') {
+        imageUrlTrending = getUpArrowURL();
+        upArrowSection.innerHTML = '';
+        const upArrowImage = document.createElement('img');
+        upArrowImage.src = imageUrlTrending;
+        upArrowImage.alt = 'Up Arrow Image';
+        upArrowImage.style.width = '100%';
+        upArrowImage.style.height = '100%';
+        upArrowImage.style.objectFit = 'cover';
+        upArrowSection.appendChild(upArrowImage);
+
+        downArrowSection.innerHTML = '';
+
+    } else if (trendingMood === 'worsening') {
+        imageUrlTrending = getDownArrowURL();
+        downArrowSection.innerHTML = '';
+        const downArrowImage = document.createElement('img');
+        downArrowImage.src = imageUrlTrending;
+        downArrowImage.alt = 'Down Arrow Image';
+        downArrowImage.style.width = '100%';
+        downArrowImage.style.height = '100%';
+        downArrowImage.style.objectFit = 'cover';
+        downArrowSection.appendChild(downArrowImage);
+
+        upArrowSection.innerHTML = '';
+    } else {
+        upArrowSection.innerHTML = '';
+        downArrowSection.innerHTML = '';
+    }
 }
+
 
 export function calculateMood() {
     const allTimeAverage = getAllTimeAverageData().average;
@@ -335,6 +385,7 @@ export function drawDecibelLineChart() {
     const threshold = getThresholdDecibelLevel();
     const currentdB = getCurrentAveragedB();
 
+    // Determine the stroke style based on the current decibel level
     if (currentdB < threshold / 2) {
         ctx.strokeStyle = 'green';
     } else if (currentdB < threshold * 0.9) {
@@ -345,12 +396,17 @@ export function drawDecibelLineChart() {
 
     ctx.lineWidth = 2;
 
+    // Start the line path
     ctx.beginPath();
     const spacing = canvasWidth / averagedBs.length;
 
+    // Scale the decibel levels to fit the bottom half of the canvas
+    const maxGraphHeight = canvasHeight / 2; // Maximum height is half the canvas
+    const baseLine = canvasHeight; // 0 dB is at the bottom of the canvas
+
     averagedBs.forEach((value, index) => {
         const x = index * spacing;
-        const y = (canvasHeight) - (value * (canvasHeight) / 100);
+        const y = baseLine - (value * maxGraphHeight / 100); // Scale value to fit in the bottom half
         if (index === 0) {
             ctx.moveTo(x, y);
         } else {
@@ -360,8 +416,9 @@ export function drawDecibelLineChart() {
 
     ctx.stroke();
 
+    // Draw the line for the highest dB suffered
     const highestdB = getHighestdBSuffered();
-    const highestdBPosition = (canvasHeight) - (highestdB * (canvasHeight) / 100);
+    const highestdBPosition = baseLine - (highestdB * maxGraphHeight / 100);
 
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 2;
@@ -371,8 +428,9 @@ export function drawDecibelLineChart() {
     ctx.lineTo(canvasWidth, highestdBPosition);
     ctx.stroke();
 
+    // Draw the line for the all-time average
     const allTimeAverage = getAllTimeAverageData().average;
-    const allTimeAveragePosition = (canvasHeight) - (allTimeAverage * (canvasHeight) / 100);
+    const allTimeAveragePosition = baseLine - (allTimeAverage * maxGraphHeight / 100);
 
     ctx.strokeStyle = 'yellow';
     ctx.lineWidth = 2;
@@ -381,7 +439,21 @@ export function drawDecibelLineChart() {
     ctx.moveTo(0, allTimeAveragePosition);
     ctx.lineTo(canvasWidth, allTimeAveragePosition);
     ctx.stroke();
+
+    // Draw the threshold line
+    const thresholdPosition = baseLine - (threshold * maxGraphHeight / 100);
+
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]); // Dotted line pattern
+    ctx.beginPath();
+    ctx.moveTo(0, thresholdPosition);
+    ctx.lineTo(canvasWidth, thresholdPosition);
+    ctx.stroke();
+    ctx.setLineDash([]); // Reset line dash to solid
 }
+
+
 
 export async function startSession() {
     getElements().yappingDogImg.classList.remove('d-none');
@@ -395,7 +467,6 @@ export async function startSession() {
     sessionTimer = setInterval(async () => {
         const elapsedTime = Math.floor((Date.now() - sessionStartTime) / 1000);
         setRemainingTimeSession(sessionDuration - elapsedTime);
-        console.log("yapping for " + getRemainingTimeSession());
 
         if (getRemainingTimeSession() <= 0) {
             clearInterval(sessionTimer);

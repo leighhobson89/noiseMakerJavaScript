@@ -18,6 +18,8 @@ const GAME_VISIBLE_ACTIVE = 'gameVisibleActive';
 const HAPPY_IMAGE_URL = "./resources/images/happy.png";
 const FRUSTRATED_IMAGE_URL = "./resources/images/frustrated.png";
 const ANGRY_IMAGE_URL = "./resources/images/angry.png";
+const UP_ARROW_URL = "./resources/images/upArrow.png";
+const DOWN_ARROW_URL = "./resources/images/downArrow.png";
 
 const samplesURLS = {
     samples: {
@@ -50,6 +52,7 @@ let averagedBs = [];
 let currentAveragedB = 0;
 let temperament = 0;
 let currentImage = null;
+let trendingMood = 'improving';
 
 let allTimeAverageData = {
     sum: 0,
@@ -95,7 +98,10 @@ export function setElements() {
         maxSessionTimeField: document.getElementById('maxSessionTimeField'),
         thresholddBLabel: document.querySelector('label[for="thresholddBField"]'),
         thresholddB: document.getElementById('thresholddBField'),
-        floatingMoodContainer: document.getElementById('floatingMoodContainer')
+        floatingMoodContainer: document.getElementById('floatingMoodContainer'),
+        floatingMoodContainerRight: document.getElementById('floatingMoodContainerRight'),
+        floatingMoodContainerLeftUp: document.getElementById('floatingMoodContainerLeftUp'),
+        floatingMoodContainerLeftDown: document.getElementById('floatingMoodContainerLeftDown')
     };
 }
 
@@ -433,5 +439,21 @@ export function getFrustratedURL() {
 
 export function getAngryURL() {
     return ANGRY_IMAGE_URL;
+}
+
+export function setTrendingMood(value) {
+    trendingMood = value;
+}
+
+export function getTrendingMood() {
+    return trendingMood;
+}
+
+export function getUpArrowURL() {
+    return UP_ARROW_URL;
+}
+
+export function getDownArrowURL() {
+    return DOWN_ARROW_URL;
 }
 

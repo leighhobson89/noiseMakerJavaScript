@@ -80,8 +80,7 @@ export function updateCanvas() {
         const remainingWaitTime = getRemainingTimeSession();
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
-        ctx.fillText(`Next Yapping Session...${remainingWaitTime} seconds🤣🤣`, 10, 30);
-        ctx.fillText(`Will Yap at: ${getThresholdDecibelLevel()}dB`, 10, 90);
+        ctx.fillText(`Yapping Decision...${remainingWaitTime} s`, 10, 30);
 
         const highestdB = getHighestdBSuffered();
         const threshold = getThresholdDecibelLevel();
