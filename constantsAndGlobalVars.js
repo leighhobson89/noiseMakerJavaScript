@@ -71,6 +71,7 @@ let sessionActive = false;
 let microphonePermissionGranted = false;
 let initializingMic = false;
 let averageAlreadyBoosted = false;
+let buttonClickYap = false;
 
 let autoSaveOn = false;
 export let pauseAutoSaveCountdown = true;
@@ -456,4 +457,14 @@ export function getUpArrowURL() {
 export function getDownArrowURL() {
     return DOWN_ARROW_URL;
 }
+
+export function setButtonClickYap(value) {
+    buttonClickYap = value;
+}
+
+export function getButtonClickYap() {
+    return buttonClickYap;
+}
+
+
 

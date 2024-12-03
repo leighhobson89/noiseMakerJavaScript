@@ -1,4 +1,6 @@
 import {
+    setButtonClickYap,
+    getButtonClickYap,
     getUpArrowURL,
     getDownArrowURL,
     setTrendingMood,
@@ -225,7 +227,7 @@ export async function gameLoop() {
                     clearInterval(waitTimer);
                     setWaitTimerActive(false);
                     stopMicrophone();
-                    startSession();
+                    startSession(false);
                 } else if (getDecibelLevel() > getThresholdDecibelLevel()) {
                     if (!getAverageAlreadyBoosted()) {
                         const allTimeAverageData = getAllTimeAverageData();
@@ -473,7 +475,10 @@ export function drawDecibelLineChart() {
 }
 
 
-export async function startSession() {
+export async function startSession(buttonClickYap) {
+    if (buttonClickYap) {
+        setButtonClickYap(true);
+    }
     getElements().yappingDogImg.classList.remove('d-none');
     getElements().floatingMoodContainer.classList.add('d-none');
 
@@ -528,7 +533,7 @@ export async function startWaitTimer() {
             setWaitTimerActive(false);
             stopMicrophone();
             if (getTemperament() === 2) {
-                startSession();
+                startSession(false);
             } else if (getTemperament() === 1) {
                 const allTimeAverage = getAllTimeAverageData().average;
                 const threshold = getThresholdDecibelLevel();
@@ -537,7 +542,7 @@ export async function startWaitTimer() {
 
                 if (randomChance <= percentage) {
                     console.log("Will Yap");
-                    startSession();
+                    startSession(false);
                 } else {
                     console.log("No Yapping. Condition not met. Random chance:", randomChance.toFixed(2), ">");
                     stopSession(true);
