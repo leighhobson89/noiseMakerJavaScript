@@ -478,7 +478,6 @@ export function drawDecibelLineChart() {
     ctx.fillText(`Current: ${Math.round(currentdB)}dB`, canvasWidth - 150, baseLine - (currentdB * maxGraphHeight / 100) - 5);
 }
 
-
 export async function startSession(buttonClickYap, countYapTrueNotFalse) {
     if (countYapTrueNotFalse) {
         setReactionCounter(getReactionCounter() + 1);
