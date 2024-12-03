@@ -1,4 +1,4 @@
-import { setTemperament, getTemperament, getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, setSessionActive, getAllTimeAverageData } from './constantsAndGlobalVars.js';
+import { getButtonClickYap, setTemperament, getTemperament, getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisiblePaused, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, setSessionActive, getAllTimeAverageData } from './constantsAndGlobalVars.js';
 import { calculateMood, drawDecibelLineChart, stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     getElements().button1.addEventListener('click', () => {
         stopAllTimers();
         if (!getSessionActive()) {
-            startSession();
+            startSession(true);
             setWaitTimerActive(false);
         }
         getElements().yappingDogImg.classList.remove('d-none');
@@ -73,10 +73,17 @@ export function updateCanvas() {
     if (getSessionActive()) {
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
-        ctx.fillText(`Yapping Session Active...🤣🤣🤣`, 10, 30);
+        
+        if (!getButtonClickYap()) {
+            ctx.fillText(`Yapping Session Active...🤣🤣🤣`, 10, 30);
+        } else {
+            ctx.fillText(`Calibrate Your Volume Yap...`, 10, 30);
+        }
+
         if (getRemainingTimeSession() !== null) {
             ctx.fillText(`Yapping for the next ${getRemainingTimeSession()} seconds`, 10, 60);
         }
+
     } else if (getWaitTimerActive()) {
         const remainingWaitTime = getRemainingTimeSession();
         ctx.fillStyle = 'white';
