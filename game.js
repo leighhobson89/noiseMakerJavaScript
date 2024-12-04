@@ -360,7 +360,6 @@ export function calculateMood() {
     return mood;
 }
 
-
 export function updateAllTimeAverage(newValue) {
     let allTimeAverageData = getAllTimeAverageData();
 
