@@ -1,5 +1,5 @@
-import { getMicrophoneModeActive, setMicrophoneModeActive, getReactionCounter, setNoiseType, getButtonClickYap, setTemperament, getHighestdBSuffered, getDecibelLevel, setWaitTimerActive, getWaitTimerActive, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel } from './constantsAndGlobalVars.js';
-import { calculateMood, drawDecibelLineChart, stopAllTimers, setGameState, startGame } from './game.js';
+import { setCurrentImage, getAngryURL, getMicrophoneModeActive, setMicrophoneModeActive, getReactionCounter, setNoiseType, getButtonClickYap, setTemperament, getHighestdBSuffered, getDecibelLevel, setWaitTimerActive, getWaitTimerActive, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, getTemporaryStopCheckingMicrophone } from './constantsAndGlobalVars.js';
+import { initializeMicrophoneListener, stopMicrophone, calculateMood, drawDecibelLineChart, stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
 
@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         getElements().yappingDogImg.classList.remove('d-none');
     });
+23
 
     getElements().stopButton.addEventListener('click', () => {
         getElements().yappingDogImg.classList.add('d-none');
@@ -42,21 +43,53 @@ document.addEventListener('DOMContentLoaded', async () => {
          setWaitTimerActive(false);
     });
 
-    getElements().micModeToggleButton.addEventListener('click', () => {
+    getElements().micModeToggleButton.addEventListener('click', async () => {
         if (getMicrophoneModeActive()) {
+            setAngryImageForTimerMode();
             setMicrophoneModeActive(false);
+            stopMicrophone();
+            getElements().micModeToggleButton.classList.remove('btn-warning');
+            getElements().micModeToggleButton.classList.add('btn-secondary');
+            getElements().floatingContainerRight.classList.add('d-none');
+            getElements().floatingMoodContainerLeftUp.classList.add('d-none');
+            getElements().floatingMoodContainerLeftDown.classList.add('d-none');
+        } else {         
             getElements().micModeToggleButton.classList.remove('btn-secondary');
             getElements().micModeToggleButton.classList.add('btn-warning');
-        } else {
-            getElements().micModeToggleButton.classList.add('btn-secondary');
-            getElements().micModeToggleButton.classList.remove('btn-warning');
+            
             setMicrophoneModeActive(true);
+            if (getWaitTimerActive()) {
+                getElements().micModeToggleButton.classList.add('disable-button'); //to stop messing up the system by rapid clicking while initializing microphone
+                await initializeMicrophoneListener();
+                getElements().micModeToggleButton.classList.remove('disable-button'); //reactivate disabled button after initialized mic
+                getElements().floatingMoodContainer.classList.remove('d-none');
+            }
+            getElements().floatingContainerRight.classList.remove('d-none');
+            getElements().floatingMoodContainerLeftUp.classList.remove('d-none');
+            getElements().floatingMoodContainerLeftDown.classList.remove('d-none');
         }
     });
 
     setGameState(getMenuState());
     handleLanguageChange(getLanguageSelected());
 });
+
+export function setAngryImageForTimerMode() {
+    const moodImageContainer = getElements().floatingMoodContainerRight;
+    const imageUrl = getAngryURL();
+
+    setCurrentImage(imageUrl);
+    moodImageContainer.innerHTML = '';
+
+    const moodImage = document.createElement('img');
+    moodImage.src = imageUrl;
+    moodImage.alt = 'Mood Image';
+    moodImage.style.width = '100%';
+    moodImage.style.height = '100%';
+    moodImage.style.objectFit = 'cover';
+
+    moodImageContainer.appendChild(moodImage);
+}
 
 function initialiseGameFromMenuButtons() {
     setBeginGameStatus(true);
@@ -125,46 +158,54 @@ export function updateCanvas() {
         ctx.font = '20px Arial';
 
         ctx.fillText(`Total Yapping Sessions: ${getReactionCounter()}`, 10, 30);
-        ctx.fillText(`Yapping Decision...${remainingWaitTime} s`, 10, 60);
 
-        const highestdB = getHighestdBSuffered();
-        const threshold = getThresholdDecibelLevel();
-        let highestdBColor = 'white';
+        if (getMicrophoneModeActive()) {
+            ctx.fillText(`Yapping Decision...${remainingWaitTime} s`, 10, 60);
 
-        if (highestdB < threshold / 2) {
-            highestdBColor = 'green';
-        } else if (highestdB < threshold * 0.9) {
-            highestdBColor = 'orange';
+            let highestdBColor;
+
+            const highestdB = getHighestdBSuffered();
+            const threshold = getThresholdDecibelLevel();
+    
+            if (highestdB < threshold / 2) {
+                highestdBColor = 'green';
+            } else if (highestdB < threshold * 0.9) {
+                highestdBColor = 'orange';
+            } else {
+                highestdBColor = 'red';
+            }
+    
+            const decibelLevel = getDecibelLevel();
+    
+            if (decibelLevel < threshold / 2) {
+                currentnoiseColor = 'green';
+            } else if (decibelLevel < threshold * 0.9) {
+                currentnoiseColor = 'orange';
+            } else {
+                currentnoiseColor = 'red';
+            }
+    
+            const mood = calculateMood();
+    
+            if (mood === "None") {
+                setTemperament(0);
+                ctx.fillStyle = 'green';
+            } else if (mood === "Elevated") {
+                setTemperament(1);
+                ctx.fillStyle = 'orange';
+            } else if (mood === "On the verge!") {
+                setTemperament(2);
+                ctx.fillStyle = 'red';
+            }
+    
+            ctx.fillText(`Desire to Yap: ${mood}`, 10, 90);
+    
+            drawDecibelLineChart();
         } else {
-            highestdBColor = 'red';
+            ctx.fillText(`Yapping In...${remainingWaitTime} s`, 10, 60);
+            ctx.fillText(`Cooldown Between: ${getMinWaitTime()}s and ${getMaxWaitTime()}s`, 10, 120);
+            ctx.fillText(`Yap Sessions Between: ${getMinSessionTime()}s and ${getMaxSessionTime()}s`, 10, 150);
         }
-
-        const decibelLevel = getDecibelLevel();
-
-        if (decibelLevel < threshold / 2) {
-            currentnoiseColor = 'green';
-        } else if (decibelLevel < threshold * 0.9) {
-            currentnoiseColor = 'orange';
-        } else {
-            currentnoiseColor = 'red';
-        }
-
-        const mood = calculateMood();
-
-        if (mood === "None") {
-            setTemperament(0);
-            ctx.fillStyle = 'green';
-        } else if (mood === "Elevated") {
-            setTemperament(1);
-            ctx.fillStyle = 'orange';
-        } else if (mood === "On the verge!") {
-            setTemperament(2);
-            ctx.fillStyle = 'red';
-        }
-
-        ctx.fillText(`Desire to Yap: ${mood}`, 10, 90);
-
-        drawDecibelLineChart();
     }    
 }
 

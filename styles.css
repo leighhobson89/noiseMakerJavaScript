@@ -229,3 +229,7 @@ canvas {
     height: 100%;
 }
 
+.disable-button {
+    pointer-events: none;
+}
+

@@ -99,7 +99,7 @@ let microphonePermissionGranted = false;
 let initializingMic = false;
 let averageAlreadyBoosted = false;
 let buttonClickYap = false;
-let microphoneModeActive = true;
+let microphoneModeActive = false;
 
 //GETTER SETTER METHODS
 export function setElements() {
@@ -113,7 +113,7 @@ export function setElements() {
         canvas: document.getElementById('canvas'),
         canvasContainer: document.getElementById('canvasContainer'),
         buttonRow: document.getElementById('buttonRow'),
-        overlay: document.getElementById('overlay'),
+        floatingContainerRight: document.getElementById('floatingContainerRight'),
         yapButton: document.getElementById('yapButton'),
         stopButton: document.getElementById('stopButton'),
         micModeToggleButton: document.getElementById('micModeToggleButton'),

@@ -54,10 +54,12 @@ import {
     gameState,
     setWaitTimerActive,
     getSessionActive,
-    getTemperament
+    getTemperament,
+    getMicrophoneModeActive
 } from './constantsAndGlobalVars.js';
 import {
-    updateCanvas
+    updateCanvas,
+    setAngryImageForTimerMode
 } from './ui.js';
 
 let sessionTimer;
@@ -118,7 +120,6 @@ function initialiseSideBarElements() {
 
     getElements().thresholddBLabel.classList.remove('d-none');
     getElements().thresholddB.classList.remove('d-none');
-
 }
 
 export function updateInputFieldValues() {
@@ -206,7 +207,7 @@ export async function gameLoop() {
     if (gameState === getGameVisibleActive()) {
         ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
 
-        if (getInitializingMic()) {
+        if (getInitializingMic() && getMicrophoneModeActive()) {
             ctx.fillStyle = 'white';
             ctx.font = '20px Arial';
             ctx.fillText(`Reinitializing Microphone...😕`, 10, 30);
@@ -216,7 +217,7 @@ export async function gameLoop() {
         }
         
         if (gameState === getGameVisibleActive() && !getInitializingMic()) {
-            if (!getSessionActive() && !getTemporaryStopCheckingMicrophone()) {
+            if (!getSessionActive() && !getTemporaryStopCheckingMicrophone() && getMicrophoneModeActive()) {
                 updateDecibelLevel();
                 if ((getDecibelLevel() > getThresholdDecibelLevel() && getTemperament() === 2) || (getDecibelLevel() > getThresholdDecibelLevel() * 3)) {
                     setTemporaryStopCheckingMicrophone(true);
@@ -493,7 +494,9 @@ export async function startSession(buttonClickYap, countYapTrueNotFalse) {
 
         if (getRemainingTimeSession() <= 0) {
             clearInterval(sessionTimer);
-            await initializeMicrophoneListener();
+            if (getMicrophoneModeActive()) {
+                await initializeMicrophoneListener();
+            }
             stopSession(false);
         } else {
             playRandomSound();
@@ -524,6 +527,10 @@ export async function stopSession(setupMic) {
 export async function startWaitTimer() {
     let remainingWaitTime = Math.floor(Math.random() * (getMaxWaitTime() - getMinWaitTime() + 1)) + getMinWaitTime();
     setWaitTimerActive(true);
+
+    if (!getMicrophoneModeActive()) {
+        setAngryImageForTimerMode();
+    }
 
     waitTimer = setInterval(() => {
         remainingWaitTime--;
@@ -645,7 +652,7 @@ async function checkMicrophonePermission() {
 }
 
 
-async function initializeMicrophoneListener() {
+export async function initializeMicrophoneListener() {
     setInitializingMic(true);
 
     if (getMicrophonePermissionGranted()) {
@@ -700,7 +707,7 @@ function updateDecibelLevel() {
     }
 }
 
-function stopMicrophone() {
+export function stopMicrophone() {
     if (micStream) {
         const tracks = micStream.getTracks();
         tracks.forEach(track => track.stop());
