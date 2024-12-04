@@ -105,6 +105,7 @@ let microphonePermissionGranted = false;
 let initializingMic = false;
 let averageAlreadyBoosted = false;
 let buttonClickYap = false;
+let microphoneModeActive = true;
 
 let autoSaveOn = false;
 export let pauseAutoSaveCountdown = true;
@@ -122,8 +123,9 @@ export function setElements() {
         canvasContainer: document.getElementById('canvasContainer'),
         buttonRow: document.getElementById('buttonRow'),
         overlay: document.getElementById('overlay'),
-        button1: document.getElementById('button1'),
-        button2: document.getElementById('button2'),
+        yapButton: document.getElementById('yapButton'),
+        stopButton: document.getElementById('stopButton'),
+        micModeToggleButton: document.getElementById('micModeToggleButton'),
         yappingDogImg: document.getElementById('yappingDogImg'),
         minWaitTimeLabel: document.querySelector('label[for="minWaitTimeField"]'),
         maxWaitTimeLabel: document.querySelector('label[for="maxWaitTimeField"]'),
@@ -516,6 +518,14 @@ export function setReactionCounter(value) {
 
 export function getReactionCounter() {
     return reactionCounter;
+}
+
+export function setMicrophoneModeActive(value) {
+    microphoneModeActive = value;
+}
+
+export function getMicrophoneModeActive() {
+    return microphoneModeActive;
 }
 
 

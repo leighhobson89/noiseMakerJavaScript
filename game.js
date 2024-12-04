@@ -1,4 +1,6 @@
 import {
+    getMicrophoneModeActive,
+    setMicrophoneModeActive,
     setReactionCounter,
     getReactionCounter,
     getNoiseType,
@@ -744,8 +746,9 @@ export function setGameState(newState) {
             getElements().buttonRow.classList.remove('d-flex');
             getElements().canvasContainer.classList.remove('d-flex');
             getElements().canvasContainer.classList.add('d-none');
-            getElements().button1.classList.add('d-none');
-            getElements().button2.classList.add('d-none');
+            getElements().yapButton.classList.add('d-none');
+            getElements().stopButton.classList.add('d-none');
+            getElements().micModeToggleButton.classList.add('d-none');
 
             console.log("Language is " + getLanguage());
             break;
@@ -756,8 +759,9 @@ export function setGameState(newState) {
             getElements().buttonRow.classList.add('d-flex');
             getElements().canvasContainer.classList.remove('d-none');
             getElements().canvasContainer.classList.add('d-flex');
-            getElements().button1.classList.remove('d-none');
-            getElements().button2.classList.remove('d-none');
+            getElements().yapButton.classList.remove('d-none');
+            getElements().stopButton.classList.remove('d-none');
+            getElements().micModeToggleButton.classList.remove('d-none');
             break;
     }
 }

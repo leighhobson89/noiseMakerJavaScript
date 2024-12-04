@@ -1,4 +1,4 @@
-import { getReactionCounter, setNoiseType, getNoiseType, getButtonClickYap, setTemperament, getTemperament, getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, setSessionActive, getAllTimeAverageData, setReactionCounter } from './constantsAndGlobalVars.js';
+import { getMicrophoneModeActive, setMicrophoneModeActive, getReactionCounter, setNoiseType, getNoiseType, getButtonClickYap, setTemperament, getTemperament, getHighestdBSuffered, getDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, setWaitTimerActive, getWaitTimerActive, getCurrentSound, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, setSessionActive, getAllTimeAverageData, setReactionCounter } from './constantsAndGlobalVars.js';
 import { calculateMood, drawDecibelLineChart, stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         initialiseGameFromMenuButtons();
     });
 
-    getElements().button1.addEventListener('click', () => {
+    getElements().yapButton.addEventListener('click', () => {
         stopAllTimers();
         if (!getSessionActive()) {
             startSession(true, false);
@@ -35,11 +35,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         getElements().yappingDogImg.classList.remove('d-none');
     });
 
-    getElements().button2.addEventListener('click', () => {
+    getElements().stopButton.addEventListener('click', () => {
         getElements().yappingDogImg.classList.add('d-none');
 
          stopAllTimers();
          setWaitTimerActive(false);
+    });
+
+    getElements().micModeToggleButton.addEventListener('click', () => {
+        if (getMicrophoneModeActive()) {
+            setMicrophoneModeActive(false);
+            getElements().micModeToggleButton.classList.remove('btn-secondary');
+            getElements().micModeToggleButton.classList.add('btn-warning');
+        } else {
+            getElements().micModeToggleButton.classList.add('btn-secondary');
+            getElements().micModeToggleButton.classList.remove('btn-warning');
+            setMicrophoneModeActive(true);
+        }
     });
 
     setGameState(getMenuState());
