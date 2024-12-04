@@ -1,19 +1,15 @@
 import {
+    getOnlyMicModeOn,
+    setOnlyMicModeOn,
     setReactionCounter,
     getReactionCounter,
-    getNoiseType,
-    setNoiseType,
-    setButtonClickYap,
-    getButtonClickYap,
-    getUpArrowURL,
+    getNoiseType, setButtonClickYap, getUpArrowURL,
     getDownArrowURL,
     setTrendingMood,
     getTrendingMood,
     getHappyURL,
     getFrustratedURL,
-    getAngryURL,
-    getCurrentImage,
-    setCurrentImage,
+    getAngryURL, setCurrentImage,
     setAverageAlreadyBoosted,
     getAverageAlreadyBoosted,
     getInitializingMic,
@@ -54,17 +50,18 @@ import {
     setGameStateVariable,
     getBeginGameStatus,
     getMenuState,
-    getGameVisiblePaused,
     getGameVisibleActive,
     getElements,
     getLanguage,
     gameState,
     setWaitTimerActive,
     getSessionActive,
-    getTemperament
+    getTemperament,
+    getMicrophoneModeActive
 } from './constantsAndGlobalVars.js';
 import {
-    updateCanvas
+    updateCanvas,
+    setAngryImageForTimerMode
 } from './ui.js';
 
 let sessionTimer;
@@ -126,7 +123,6 @@ function initialiseSideBarElements() {
 
     getElements().thresholddBLabel.classList.remove('d-none');
     getElements().thresholddB.classList.remove('d-none');
-
 }
 
 export function updateInputFieldValues() {
@@ -208,13 +204,15 @@ function updateHighestdB() {
 
 
 export async function gameLoop() {
+    let canvasAlreadyUpdatedThisFrame = false;
+
     const ctx = getElements().canvas.getContext('2d');
 
 
-    if (gameState === getGameVisibleActive() || gameState === getGameVisiblePaused()) {
+    if (gameState === getGameVisibleActive()) {
         ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
 
-        if (getInitializingMic()) {
+        if (getInitializingMic() && getMicrophoneModeActive()) {
             ctx.fillStyle = 'white';
             ctx.font = '20px Arial';
             ctx.fillText(`Reinitializing Microphone...😕`, 10, 30);
@@ -222,9 +220,11 @@ export async function gameLoop() {
             getElements().yappingDogImg.classList.add('d-none');
             getElements().floatingMoodContainer.classList.add('d-none');
         }
+
+        getMicrophoneModeActive() ? getElements().onlyMicToggleButton.classList.remove('disable-button') : getElements().onlyMicToggleButton.classList.add('disable-button');
         
         if (gameState === getGameVisibleActive() && !getInitializingMic()) {
-            if (!getSessionActive() && !getTemporaryStopCheckingMicrophone()) {
+            if (!getSessionActive() && !getTemporaryStopCheckingMicrophone() && getMicrophoneModeActive()) {
                 updateDecibelLevel();
                 if ((getDecibelLevel() > getThresholdDecibelLevel() && getTemperament() === 2) || (getDecibelLevel() > getThresholdDecibelLevel() * 3)) {
                     setTemporaryStopCheckingMicrophone(true);
@@ -258,8 +258,6 @@ export async function gameLoop() {
                         setTrendingMood('worsening');
                     }
 
-                    updateMoodImage();
-
                     const averagedBs = getAveragedBs();
                     averagedBs.push(averagedB);
                     setAveragedBs(averagedBs);
@@ -274,12 +272,22 @@ export async function gameLoop() {
     
                     updateAllTimeAverage(getCurrentAveragedB());
                     setAverageAlreadyBoosted(false);
+
+                    updateCanvas();
+                    canvasAlreadyUpdatedThisFrame = true;
+
+                    updateMoodImage();
                 }
             }
-            updateCanvas();
+            
+            if (!canvasAlreadyUpdatedThisFrame) {
+                updateCanvas();
+            }
+
             updateInputFieldValues();
         }
 
+        console.log(getOnlyMicModeOn());
         requestAnimationFrame(gameLoop);
     }
 }
@@ -367,18 +375,31 @@ export function calculateMood() {
     return mood;
 }
 
-
 export function updateAllTimeAverage(newValue) {
     let allTimeAverageData = getAllTimeAverageData();
 
+    allTimeAverageData.values.push(newValue);
     allTimeAverageData.sum += newValue;
     allTimeAverageData.count += 1;
 
-    if (allTimeAverageData.count > 0) {
-        allTimeAverageData.average = parseFloat((allTimeAverageData.sum / allTimeAverageData.count).toFixed(1));
+    if (allTimeAverageData.values.length > 50) {
+        const removedValue = allTimeAverageData.values.shift();
+        allTimeAverageData.sum -= removedValue;
+        allTimeAverageData.count -= 1;
     }
 
-    console.log(allTimeAverageData.average);
+    const weights = allTimeAverageData.values.map((_, index) => index > allTimeAverageData.count - 10 ? 2 : 1);
+    const weightedSum = allTimeAverageData.values.reduce(
+        (acc, val, i) => acc + val * weights[i], 
+        0
+    );
+    const totalWeight = weights.reduce((acc, val) => acc + val, 0);
+    const weightedAverage = weightedSum / totalWeight;
+
+    const previousSmoothedAverage = allTimeAverageData.smoothedAverage || weightedAverage;
+    allTimeAverageData.smoothedAverage = parseFloat(((previousSmoothedAverage * 2 + weightedAverage) / 3).toFixed(1));
+
+    allTimeAverageData.average = allTimeAverageData.smoothedAverage;
 
     setAllTimeAverageData(allTimeAverageData);
 }
@@ -501,7 +522,9 @@ export async function startSession(buttonClickYap, countYapTrueNotFalse) {
 
         if (getRemainingTimeSession() <= 0) {
             clearInterval(sessionTimer);
-            await initializeMicrophoneListener();
+            if (getMicrophoneModeActive()) {
+                await initializeMicrophoneListener();
+            }
             stopSession(false);
         } else {
             playRandomSound();
@@ -533,6 +556,10 @@ export async function startWaitTimer() {
     let remainingWaitTime = Math.floor(Math.random() * (getMaxWaitTime() - getMinWaitTime() + 1)) + getMinWaitTime();
     setWaitTimerActive(true);
 
+    if (!getMicrophoneModeActive()) {
+        setAngryImageForTimerMode();
+    }
+
     waitTimer = setInterval(() => {
         remainingWaitTime--;
         setRemainingTimeSession(remainingWaitTime);
@@ -540,20 +567,28 @@ export async function startWaitTimer() {
             clearInterval(waitTimer);
             setWaitTimerActive(false);
             stopMicrophone();
-            if (getTemperament() === 2) {
-                startSession(false, true);
-            } else if (getTemperament() === 1) {
-                const allTimeAverage = getAllTimeAverageData().average;
-                const threshold = getThresholdDecibelLevel();
-                const percentage = (allTimeAverage / threshold) * 100;
-                const randomChance = Math.random() * 100;
-
-                if (randomChance <= percentage) {
-                    console.log("Will Yap");
+            if (!getOnlyMicModeOn()) {
+                if (getTemperament() === 2) {
                     startSession(false, true);
+                } else if (getTemperament() === 1) {
+                    const allTimeAverage = getAllTimeAverageData().average;
+                    const threshold = getThresholdDecibelLevel();
+                    const percentage = (allTimeAverage / threshold) * 100;
+                    const randomChance = Math.random() * 100;
+    
+                    if (randomChance <= percentage) {
+                        console.log("Will Yap");
+                        startSession(false, true);
+                    } else {
+                        console.log("No Yapping. Condition not met. Random chance:", randomChance.toFixed(2), ">");
+                        stopSession(true);
+                    }
                 } else {
-                    console.log("No Yapping. Condition not met. Random chance:", randomChance.toFixed(2), ">");
-                    stopSession(true);
+                    if (getMicrophoneModeActive()) {
+                        stopSession(true);
+                    } else {
+                        startSession(false, true);
+                    }
                 }
             } else {
                 stopSession(true);
@@ -653,7 +688,7 @@ async function checkMicrophonePermission() {
 }
 
 
-async function initializeMicrophoneListener() {
+export async function initializeMicrophoneListener() {
     setInitializingMic(true);
 
     if (getMicrophonePermissionGranted()) {
@@ -696,19 +731,19 @@ function updateDecibelLevel() {
         dBValues.push(decibelLevel);
         setDBValues(dBValues);
 
-        if (dBValues.length === 10) {
-            const totalDB = dBValues.reduce((acc, val) => acc + parseFloat(val), 0);
+        if (dBValues.length > 10) {
+            const totalDB = dBValues.slice(-10).reduce((acc, val) => acc + parseFloat(val), 0);
             const averageDB = parseFloat((totalDB / 10).toFixed(1));
             setCurrentAveragedB(averageDB);
-
-            setDBValues([]);
+        } else {
+            setCurrentAveragedB(decibelLevel);
         }
 
         setDecibelLevel(decibelLevel);
     }
 }
 
-function stopMicrophone() {
+export function stopMicrophone() {
     if (micStream) {
         const tracks = micStream.getTracks();
         tracks.forEach(track => track.stop());
@@ -804,8 +839,9 @@ export function setGameState(newState) {
             getElements().buttonRow.classList.remove('d-flex');
             getElements().canvasContainer.classList.remove('d-flex');
             getElements().canvasContainer.classList.add('d-none');
-            getElements().button1.classList.add('d-none');
-            getElements().button2.classList.add('d-none');
+            getElements().yapButton.classList.add('d-none');
+            getElements().stopButton.classList.add('d-none');
+            getElements().micModeToggleButton.classList.add('d-none');
 
             console.log("Language is " + getLanguage());
             break;
@@ -816,8 +852,9 @@ export function setGameState(newState) {
             getElements().buttonRow.classList.add('d-flex');
             getElements().canvasContainer.classList.remove('d-none');
             getElements().canvasContainer.classList.add('d-flex');
-            getElements().button1.classList.remove('d-none');
-            getElements().button2.classList.remove('d-none');
+            getElements().yapButton.classList.remove('d-none');
+            getElements().stopButton.classList.remove('d-none');
+            getElements().micModeToggleButton.classList.remove('d-none');
             break;
     }
 }

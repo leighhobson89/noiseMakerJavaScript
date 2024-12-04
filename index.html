@@ -11,18 +11,18 @@
 <body>
     <!-- Menu Container -->
     <div id="menu" class="d-flex flex-column align-items-center justify-content-center d-none">
-        <h1 id="menuTitle" class="mb-4"></h1>
+        <h1 id="menuTitle" class="mb-2"></h1>
         <div class="d-flex mb-2">
-            <button id="yappyDog" class="btn btn-primary mr-2"></button>
+            <button id="yappyDog" class="btn btn-primary mr-2 mb-0"></button>
         </div>
         <div class="d-flex mb-2">
-            <button id="noiseType2" class="btn btn-primary mr-2"></button>
+            <button id="noiseType2" class="btn btn-primary mr-2 mb-0"></button>
         </div>
         <div class="d-flex mb-2">
-            <button id="noiseType3" class="btn btn-primary mr-2"></button>
+            <button id="noiseType3" class="btn btn-primary mr-2 mb-0"></button>
         </div>
         <div class="d-flex mb-2">
-            <button id="noiseType4" class="btn btn-primary mr-2"></button>
+            <button id="noiseType4" class="btn btn-primary mr-2 mb-0"></button>
         </div>
     </div>
 
@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <div id="floatingContainerRight">
+    <div id="floatingContainerRight" class="d-none">
         <div id="innerContainer">
             <div class="input-container">
                 <label for="thresholddBField" class="d-none form-label side-bars-elements">Threshold dB</label>
@@ -72,8 +72,10 @@
     <div id="canvasContainer" class="d-none">
         <!-- Button Row -->
         <div id="buttonRow" class="d-flex justify-content-center mb-3">
-            <button id="button1" class="btn btn-success mr-2">Yap!</button>
-            <button id="button2" class="btn btn-danger">Stop</button>
+            <button id="yapButton" class="btn-button-row btn btn-success">Yap!</button>
+            <button id="stopButton" class="btn-button-row btn btn-danger">Stop!</button>
+            <button id="micModeToggleButton" class="btn-button-row btn btn-danger">Listen Mode</button>
+            <button id="onlyMicToggleButton" class="btn-button-row btn btn-secondary">Only Mic</button>
         </div>
         <!-- Canvas Row -->
         <div class="d-flex justify-content-center">
