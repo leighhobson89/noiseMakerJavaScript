@@ -1,21 +1,13 @@
 import {
-    getMicrophoneModeActive,
-    setMicrophoneModeActive,
     setReactionCounter,
     getReactionCounter,
-    getNoiseType,
-    setNoiseType,
-    setButtonClickYap,
-    getButtonClickYap,
-    getUpArrowURL,
+    getNoiseType, setButtonClickYap, getUpArrowURL,
     getDownArrowURL,
     setTrendingMood,
     getTrendingMood,
     getHappyURL,
     getFrustratedURL,
-    getAngryURL,
-    getCurrentImage,
-    setCurrentImage,
+    getAngryURL, setCurrentImage,
     setAverageAlreadyBoosted,
     getAverageAlreadyBoosted,
     getInitializingMic,
@@ -56,7 +48,6 @@ import {
     setGameStateVariable,
     getBeginGameStatus,
     getMenuState,
-    getGameVisiblePaused,
     getGameVisibleActive,
     getElements,
     getLanguage,
@@ -212,7 +203,7 @@ export async function gameLoop() {
     const ctx = getElements().canvas.getContext('2d');
 
 
-    if (gameState === getGameVisibleActive() || gameState === getGameVisiblePaused()) {
+    if (gameState === getGameVisibleActive()) {
         ctx.clearRect(0, 0, getElements().canvas.width, getElements().canvas.height);
 
         if (getInitializingMic()) {

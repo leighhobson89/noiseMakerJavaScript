@@ -1,19 +1,14 @@
-//DEBUG
-export let debugFlag = false;
-export let debugOptionFlag = false;
-export let stateLoading = false;
-
-//ELEMENTS
-let elements;
 let localization = {};
 let language = 'en';
 let languageSelected = 'en';
 let oldLanguage = 'en';
 
+//ELEMENTS
+let elements;
+
 //CONSTANTS
 export let gameState;
 const MENU_STATE = 'menuState';
-const GAME_VISIBLE_PAUSED = 'gameVisiblePaused';
 const GAME_VISIBLE_ACTIVE = 'gameVisibleActive';
 const HAPPY_IMAGE_URL = "./resources/images/happy.png";
 const FRUSTRATED_IMAGE_URL = "./resources/images/frustrated.png";
@@ -94,7 +89,6 @@ let allTimeAverageData = {
 };
 
 //FLAGS
-let audioMuted = false;
 let languageChangedFlag = false;
 let beginGameState = true;
 let gameInProgress = false;
@@ -106,9 +100,6 @@ let initializingMic = false;
 let averageAlreadyBoosted = false;
 let buttonClickYap = false;
 let microphoneModeActive = true;
-
-let autoSaveOn = false;
-export let pauseAutoSaveCountdown = true;
 
 //GETTER SETTER METHODS
 export function setElements() {
@@ -164,43 +155,6 @@ export function setLanguageChangedFlag(value) {
     languageChangedFlag = value;
 }
 
-export function resetAllVariables() {
-    // GLOBAL VARIABLES
-
-    // FLAGS
-}
-
-export function captureGameStatusForSaving() {
-    let gameState = {};
-
-    // Game variables
-
-    // Flags
-
-    // UI elements
-
-    gameState.language = getLanguage();
-
-    return gameState;
-}
-export function restoreGameStatus(gameState) {
-    return new Promise((resolve, reject) => {
-        try {
-            // Game variables
-
-            // Flags
-
-            // UI elements
-
-            setLanguage(gameState.language);
-
-            resolve();
-        } catch (error) {
-            reject(error);
-        }
-    });
-}
-
 export function setLocalization(value) {
     localization = value;
 }
@@ -225,20 +179,8 @@ export function getOldLanguage() {
     return oldLanguage;
 }
 
-export function setAudioMuted(value) {
-    audioMuted = value;
-}
-
-export function getAudioMuted() {
-    return audioMuted;
-}
-
 export function getMenuState() {
     return MENU_STATE;
-}
-
-export function getGameVisiblePaused() {
-    return GAME_VISIBLE_PAUSED;
 }
 
 export function getGameVisibleActive() {
