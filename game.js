@@ -203,6 +203,8 @@ function updateHighestdB() {
 
 
 export async function gameLoop() {
+    let canvasAlreadyUpdatedThisFrame = false;
+
     const ctx = getElements().canvas.getContext('2d');
 
 
@@ -255,8 +257,6 @@ export async function gameLoop() {
                         setTrendingMood('worsening');
                     }
 
-                    updateMoodImage();
-
                     const averagedBs = getAveragedBs();
                     averagedBs.push(averagedB);
                     setAveragedBs(averagedBs);
@@ -271,9 +271,18 @@ export async function gameLoop() {
     
                     updateAllTimeAverage(getCurrentAveragedB());
                     setAverageAlreadyBoosted(false);
+
+                    updateCanvas();
+                    canvasAlreadyUpdatedThisFrame = true;
+
+                    updateMoodImage();
                 }
             }
-            updateCanvas();
+            
+            if (!canvasAlreadyUpdatedThisFrame) {
+                updateCanvas();
+            }
+
             updateInputFieldValues();
         }
 

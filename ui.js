@@ -158,41 +158,56 @@ export function updateCanvas() {
 
     let currentnoiseColor;
 
-    if (getSessionActive()) {
+    const drawTextWithBackground = (text, x, y) => {
+        const textMetrics = ctx.measureText(text);
+        const padding = 4; // Add some padding around the text
+        const backgroundWidth = textMetrics.width + padding * 2;
+        const backgroundHeight = parseInt(ctx.font, 10) + padding * 2;
+
+        // Draw the black background
+        ctx.fillStyle = 'black';
+        ctx.fillRect(x - padding, y - backgroundHeight + padding, backgroundWidth, backgroundHeight);
+
+        // Draw the text
         ctx.fillStyle = 'white';
+        ctx.fillText(text, x, y);
+    };
+
+    if (getSessionActive()) {
         ctx.font = '20px Arial';
-        
+
         if (!getButtonClickYap()) {
-            ctx.fillText(`Yapping Session Active...🤣🤣🤣`, 10, 30);
+            drawTextWithBackground(`Yapping Session Active...🤣🤣🤣`, 10, 30);
         } else {
-            ctx.fillText(`Calibrate Your Volume Yap...`, 10, 30);
+            drawTextWithBackground(`Calibrate Your Volume Yap...`, 10, 30);
         }
 
         if (getRemainingTimeSession() !== null) {
-            ctx.fillText(`Yapping for the next ${getRemainingTimeSession()} seconds`, 10, 60);
+            drawTextWithBackground(`Yapping for the next ${getRemainingTimeSession()} seconds`, 10, 60);
         }
 
     } else if (getWaitTimerActive()) {
         const remainingWaitTime = getRemainingTimeSession();
-        ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
 
         if (getMicrophoneModeActive()) {
-            ctx.fillText(`Listening Mode:`, 10, 30);
+            drawDecibelLineChart();
+
+            drawTextWithBackground(`Listening Mode:`, 10, 30);
             if (getOnlyMicModeOn()) {
-                ctx.fillText(`Yap only from loud, repeated noise`, 10, 60);
+                drawTextWithBackground(`Yap only from repeated noise`, 10, 60);
             } else {
-                ctx.fillText(`Yap based on mood after timer ends`, 10, 60);
+                drawTextWithBackground(`Yap based on mood after timer`, 10, 60);
             }
 
-            ctx.fillText(`Total Yapping Sessions: ${getReactionCounter()}`, 10, 120);
-            ctx.fillText(`Yapping Decision...${remainingWaitTime} s`, 10, 150);
+            drawTextWithBackground(`Total Yapping Sessions: ${getReactionCounter()}`, 10, 90);
+            drawTextWithBackground(`Yapping Decision...${remainingWaitTime} s`, 10, 120);
 
             let highestdBColor;
 
             const highestdB = getHighestdBSuffered();
             const threshold = getThresholdDecibelLevel();
-    
+
             if (highestdB < threshold / 2) {
                 highestdBColor = 'green';
             } else if (highestdB < threshold * 0.9) {
@@ -200,9 +215,9 @@ export function updateCanvas() {
             } else {
                 highestdBColor = 'red';
             }
-    
+
             const decibelLevel = getDecibelLevel();
-    
+
             if (decibelLevel < threshold / 2) {
                 currentnoiseColor = 'green';
             } else if (decibelLevel < threshold * 0.9) {
@@ -210,9 +225,9 @@ export function updateCanvas() {
             } else {
                 currentnoiseColor = 'red';
             }
-    
+
             const mood = calculateMood();
-    
+
             if (mood === "None") {
                 setTemperament(0);
                 ctx.fillStyle = 'green';
@@ -223,19 +238,18 @@ export function updateCanvas() {
                 setTemperament(2);
                 ctx.fillStyle = 'red';
             }
-    
-            ctx.fillText(`Desire to Yap: ${mood}`, 10, 210);
-    
-            drawDecibelLineChart();
+
+            drawTextWithBackground(`Desire to Yap: ${mood}`, 10, 150);
         } else {
-            ctx.fillText(`Timer Mode (Yap after timer)`, 10, 30);
-            ctx.fillText(`Total Yapping Sessions: ${getReactionCounter()}`, 10, 90);
-            ctx.fillText(`Yapping In...${remainingWaitTime} s`, 10, 120);
-            ctx.fillText(`Cooldown Between: ${getMinWaitTime()}s and ${getMaxWaitTime()}s`, 10, 180);
-            ctx.fillText(`Yap Sessions Between: ${getMinSessionTime()}s and ${getMaxSessionTime()}s`, 10, 210);
+            drawTextWithBackground(`Timer Mode (Yap after timer)`, 10, 30);
+            drawTextWithBackground(`Total Yapping Sessions: ${getReactionCounter()}`, 10, 90);
+            drawTextWithBackground(`Yapping In...${remainingWaitTime} s`, 10, 120);
+            drawTextWithBackground(`Cooldown Between: ${getMinWaitTime()}s and ${getMaxWaitTime()}s`, 10, 180);
+            drawTextWithBackground(`Yap Sessions Between: ${getMinSessionTime()}s and ${getMaxSessionTime()}s`, 10, 210);
         }
-    }    
+    }
 }
+
 
 
 
