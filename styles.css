@@ -24,6 +24,10 @@ button {
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
 
+.btn-button-row {
+    max-width: 115px;
+}
+
 .btn-primary {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }

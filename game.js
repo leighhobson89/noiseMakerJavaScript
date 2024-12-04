@@ -1,4 +1,6 @@
 import {
+    getOnlyMicModeOn,
+    setOnlyMicModeOn,
     setReactionCounter,
     getReactionCounter,
     getNoiseType, setButtonClickYap, getUpArrowURL,
@@ -215,6 +217,8 @@ export async function gameLoop() {
             getElements().yappingDogImg.classList.add('d-none');
             getElements().floatingMoodContainer.classList.add('d-none');
         }
+
+        getMicrophoneModeActive() ? getElements().onlyMicToggleButton.classList.remove('disable-button') : getElements().onlyMicToggleButton.classList.add('disable-button');
         
         if (gameState === getGameVisibleActive() && !getInitializingMic()) {
             if (!getSessionActive() && !getTemporaryStopCheckingMicrophone() && getMicrophoneModeActive()) {
@@ -273,6 +277,7 @@ export async function gameLoop() {
             updateInputFieldValues();
         }
 
+        console.log(getOnlyMicModeOn());
         requestAnimationFrame(gameLoop);
     }
 }
@@ -388,8 +393,6 @@ export function updateAllTimeAverage(newValue) {
 
     setAllTimeAverageData(allTimeAverageData);
 }
-
-
 
 export function drawDecibelLineChart() {
     const ctx = getElements().canvas.getContext('2d');
@@ -554,20 +557,28 @@ export async function startWaitTimer() {
             clearInterval(waitTimer);
             setWaitTimerActive(false);
             stopMicrophone();
-            if (getTemperament() === 2) {
-                startSession(false, true);
-            } else if (getTemperament() === 1) {
-                const allTimeAverage = getAllTimeAverageData().average;
-                const threshold = getThresholdDecibelLevel();
-                const percentage = (allTimeAverage / threshold) * 100;
-                const randomChance = Math.random() * 100;
-
-                if (randomChance <= percentage) {
-                    console.log("Will Yap");
+            if (!getOnlyMicModeOn()) {
+                if (getTemperament() === 2) {
                     startSession(false, true);
+                } else if (getTemperament() === 1) {
+                    const allTimeAverage = getAllTimeAverageData().average;
+                    const threshold = getThresholdDecibelLevel();
+                    const percentage = (allTimeAverage / threshold) * 100;
+                    const randomChance = Math.random() * 100;
+    
+                    if (randomChance <= percentage) {
+                        console.log("Will Yap");
+                        startSession(false, true);
+                    } else {
+                        console.log("No Yapping. Condition not met. Random chance:", randomChance.toFixed(2), ">");
+                        stopSession(true);
+                    }
                 } else {
-                    console.log("No Yapping. Condition not met. Random chance:", randomChance.toFixed(2), ">");
-                    stopSession(true);
+                    if (getMicrophoneModeActive()) {
+                        stopSession(true);
+                    } else {
+                        startSession(false, true);
+                    }
                 }
             } else {
                 stopSession(true);

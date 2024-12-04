@@ -1,4 +1,4 @@
-import { setCurrentImage, getAngryURL, getMicrophoneModeActive, setMicrophoneModeActive, getReactionCounter, setNoiseType, getButtonClickYap, setTemperament, getHighestdBSuffered, getDecibelLevel, setWaitTimerActive, getWaitTimerActive, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, getTemporaryStopCheckingMicrophone } from './constantsAndGlobalVars.js';
+import { setOnlyMicModeOn, getOnlyMicModeOn, setCurrentImage, getAngryURL, getMicrophoneModeActive, setMicrophoneModeActive, getReactionCounter, setNoiseType, getButtonClickYap, setTemperament, getHighestdBSuffered, getDecibelLevel, setWaitTimerActive, getWaitTimerActive, getRemainingTimeSession, getSessionActive, getLanguage, setElements, getElements, setBeginGameStatus, getGameInProgress, setGameInProgress, getGameVisibleActive, getMenuState, getLanguageSelected, setLanguageSelected, setLanguage, getThresholdDecibelLevel, getMinWaitTime, getMaxWaitTime, getMinSessionTime, getMaxSessionTime, getTemporaryStopCheckingMicrophone } from './constantsAndGlobalVars.js';
 import { initializeMicrophoneListener, stopMicrophone, calculateMood, drawDecibelLineChart, stopAllTimers, setGameState, startGame } from './game.js';
 import { initLocalization, localize } from './localization.js';
 import { startSession } from './game.js';
@@ -49,12 +49,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             setMicrophoneModeActive(false);
             stopMicrophone();
             getElements().micModeToggleButton.classList.remove('btn-warning');
-            getElements().micModeToggleButton.classList.add('btn-secondary');
+            getElements().micModeToggleButton.classList.add('btn-danger');
             getElements().floatingContainerRight.classList.add('d-none');
             getElements().floatingMoodContainerLeftUp.classList.add('d-none');
             getElements().floatingMoodContainerLeftDown.classList.add('d-none');
-        } else {         
-            getElements().micModeToggleButton.classList.remove('btn-secondary');
+
+            setOnlyMicModeOn(false);
+            getElements().onlyMicToggleButton.classList.remove('btn-success');
+            getElements().onlyMicToggleButton.classList.remove('btn-danger');
+            getElements().onlyMicToggleButton.classList.add('btn-secondary');
+        } else {
+            getElements().micModeToggleButton.classList.remove('btn-danger');
             getElements().micModeToggleButton.classList.add('btn-warning');
             
             setMicrophoneModeActive(true);
@@ -67,6 +72,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             getElements().floatingContainerRight.classList.remove('d-none');
             getElements().floatingMoodContainerLeftUp.classList.remove('d-none');
             getElements().floatingMoodContainerLeftDown.classList.remove('d-none');
+        }
+    });
+
+    getElements().onlyMicToggleButton.addEventListener('click', () => {
+        if (getMicrophoneModeActive()) {
+            if (getOnlyMicModeOn()) {
+                getElements().onlyMicToggleButton.classList.remove('btn-success');
+                getElements().onlyMicToggleButton.classList.add('btn-danger');
+                setOnlyMicModeOn(false);
+            } else {
+                getElements().onlyMicToggleButton.classList.remove('btn-secondary');
+                getElements().onlyMicToggleButton.classList.remove('btn-danger');
+                getElements().onlyMicToggleButton.classList.add('btn-success');
+                setOnlyMicModeOn(true);
+            }
         }
     });
 
@@ -157,10 +177,16 @@ export function updateCanvas() {
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
 
-        ctx.fillText(`Total Yapping Sessions: ${getReactionCounter()}`, 10, 30);
-
         if (getMicrophoneModeActive()) {
-            ctx.fillText(`Yapping Decision...${remainingWaitTime} s`, 10, 60);
+            ctx.fillText(`Listening Mode:`, 10, 30);
+            if (getOnlyMicModeOn()) {
+                ctx.fillText(`Yap only from loud, repeated noise`, 10, 60);
+            } else {
+                ctx.fillText(`Yap based on mood after timer ends`, 10, 60);
+            }
+
+            ctx.fillText(`Total Yapping Sessions: ${getReactionCounter()}`, 10, 120);
+            ctx.fillText(`Yapping Decision...${remainingWaitTime} s`, 10, 150);
 
             let highestdBColor;
 
@@ -198,13 +224,15 @@ export function updateCanvas() {
                 ctx.fillStyle = 'red';
             }
     
-            ctx.fillText(`Desire to Yap: ${mood}`, 10, 90);
+            ctx.fillText(`Desire to Yap: ${mood}`, 10, 210);
     
             drawDecibelLineChart();
         } else {
-            ctx.fillText(`Yapping In...${remainingWaitTime} s`, 10, 60);
-            ctx.fillText(`Cooldown Between: ${getMinWaitTime()}s and ${getMaxWaitTime()}s`, 10, 120);
-            ctx.fillText(`Yap Sessions Between: ${getMinSessionTime()}s and ${getMaxSessionTime()}s`, 10, 150);
+            ctx.fillText(`Timer Mode (Yap after timer)`, 10, 30);
+            ctx.fillText(`Total Yapping Sessions: ${getReactionCounter()}`, 10, 90);
+            ctx.fillText(`Yapping In...${remainingWaitTime} s`, 10, 120);
+            ctx.fillText(`Cooldown Between: ${getMinWaitTime()}s and ${getMaxWaitTime()}s`, 10, 180);
+            ctx.fillText(`Yap Sessions Between: ${getMinSessionTime()}s and ${getMaxSessionTime()}s`, 10, 210);
         }
     }    
 }

@@ -102,6 +102,7 @@ let initializingMic = false;
 let averageAlreadyBoosted = false;
 let buttonClickYap = false;
 let microphoneModeActive = false;
+let onlyMicModeOn = false;
 
 //GETTER SETTER METHODS
 export function setElements() {
@@ -119,6 +120,7 @@ export function setElements() {
         yapButton: document.getElementById('yapButton'),
         stopButton: document.getElementById('stopButton'),
         micModeToggleButton: document.getElementById('micModeToggleButton'),
+        onlyMicToggleButton: document.getElementById('onlyMicToggleButton'),
         yappingDogImg: document.getElementById('yappingDogImg'),
         minWaitTimeLabel: document.querySelector('label[for="minWaitTimeField"]'),
         maxWaitTimeLabel: document.querySelector('label[for="maxWaitTimeField"]'),
@@ -472,5 +474,10 @@ export function getMicrophoneModeActive() {
     return microphoneModeActive;
 }
 
+export function setOnlyMicModeOn(value) {
+    onlyMicModeOn = value;
+}
 
-
+export function getOnlyMicModeOn() {
+    return onlyMicModeOn;
+}
