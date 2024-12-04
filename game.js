@@ -102,6 +102,7 @@ export async function startGame() {
     setGameState(getGameVisibleActive());
 
     await checkMicrophonePermission();
+    await checkAccelerometerPermission();
     gameLoop();
 }
 
@@ -729,6 +730,65 @@ function stopMicrophone() {
 
     console.log('Microphone and audio resources cleaned up');
 }
+
+//--------------------------------------ACCELEROMETER---------------------------------------
+
+async function checkAccelerometerPermission() {
+    const platform = Capacitor.getPlatform();
+
+    try {
+        if (platform === 'web') {
+            console.log('Running on the web, checking accelerometer permissions');
+
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                const permissionState = await DeviceMotionEvent.requestPermission();
+                if (permissionState === 'granted') {
+                    console.log('Accelerometer access granted on web');
+                    setAccelerometerPermissionGranted(true);
+                    listenToAccelerometer();
+                } else {
+                    console.log('Accelerometer access denied on web');
+                }
+            } else {
+                console.log('DeviceMotionEvent.requestPermission not supported, assuming access is granted');
+                setAccelerometerPermissionGranted(true);
+                listenToAccelerometer();
+            }
+        } else {
+            console.log('Running on a native platform, checking accelerometer access');
+
+            setAccelerometerPermissionGranted(true);
+            listenToAccelerometer();
+        }
+
+        if (getAccelerometerPermissionGranted()) {
+            console.log('You can now use the accelerometer');
+        } else {
+            console.log('Permission to access the accelerometer was denied');
+        }
+
+    } catch (err) {
+        console.error('Error checking or requesting accelerometer permission:', err);
+        console.error('Error name:', err.name);
+        console.error('Error message:', err.message);
+    }
+}
+
+function listenToAccelerometer() {
+    window.addEventListener('devicemotion', (event) => {
+        const { x, y, z } = event.acceleration || {};
+        console.log(`Acceleration X: ${x}, Y: ${y}, Z: ${z}`);
+    });
+}
+
+let accelerometerPermissionGranted = false;
+function setAccelerometerPermissionGranted(value) {
+    accelerometerPermissionGranted = value;
+}
+function getAccelerometerPermissionGranted() {
+    return accelerometerPermissionGranted;
+}
+
 
 //------------------------------------------------------------------------------------------
 
