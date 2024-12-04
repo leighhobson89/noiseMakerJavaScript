@@ -85,8 +85,10 @@ let reactionCounter = 0;
 let allTimeAverageData = {
     sum: 0,
     count: 0,
-    average: 0
+    average: 0,
+    values: []
 };
+
 
 //FLAGS
 let languageChangedFlag = false;

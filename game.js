@@ -364,17 +364,33 @@ export function calculateMood() {
 export function updateAllTimeAverage(newValue) {
     let allTimeAverageData = getAllTimeAverageData();
 
+    allTimeAverageData.values.push(newValue);
     allTimeAverageData.sum += newValue;
     allTimeAverageData.count += 1;
 
-    if (allTimeAverageData.count > 0) {
-        allTimeAverageData.average = parseFloat((allTimeAverageData.sum / allTimeAverageData.count).toFixed(1));
+    if (allTimeAverageData.values.length > 50) {
+        const removedValue = allTimeAverageData.values.shift();
+        allTimeAverageData.sum -= removedValue;
+        allTimeAverageData.count -= 1;
     }
 
-    console.log(allTimeAverageData.average);
+    const weights = allTimeAverageData.values.map((_, index) => index > allTimeAverageData.count - 10 ? 2 : 1);
+    const weightedSum = allTimeAverageData.values.reduce(
+        (acc, val, i) => acc + val * weights[i], 
+        0
+    );
+    const totalWeight = weights.reduce((acc, val) => acc + val, 0);
+    const weightedAverage = weightedSum / totalWeight;
+
+    const previousSmoothedAverage = allTimeAverageData.smoothedAverage || weightedAverage;
+    allTimeAverageData.smoothedAverage = parseFloat(((previousSmoothedAverage * 2 + weightedAverage) / 3).toFixed(1));
+
+    allTimeAverageData.average = allTimeAverageData.smoothedAverage;
 
     setAllTimeAverageData(allTimeAverageData);
 }
+
+
 
 export function drawDecibelLineChart() {
     const ctx = getElements().canvas.getContext('2d');
@@ -695,12 +711,12 @@ function updateDecibelLevel() {
         dBValues.push(decibelLevel);
         setDBValues(dBValues);
 
-        if (dBValues.length === 10) {
-            const totalDB = dBValues.reduce((acc, val) => acc + parseFloat(val), 0);
+        if (dBValues.length > 10) {
+            const totalDB = dBValues.slice(-10).reduce((acc, val) => acc + parseFloat(val), 0);
             const averageDB = parseFloat((totalDB / 10).toFixed(1));
             setCurrentAveragedB(averageDB);
-
-            setDBValues([]);
+        } else {
+            setCurrentAveragedB(decibelLevel);
         }
 
         setDecibelLevel(decibelLevel);
